@@ -1,42 +1,34 @@
-package nl.spaan.student_app.model;
+package nl.spaan.student_app.payload.request;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-@Entity
-@Table(name = "clients")
-public class Client {
+public class SignupRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(name = "first_name")
+    @NotBlank
     private String firstName;
 
-    @Column(name = "last_name")
+    @NotBlank
     private String lastName;
 
-    @Column(name = "email")
+
+    @Size(min = 3, max = 20)
+    private String username;
+
+    @NotBlank
+    @Size(max = 50)
+    @Email
     private String email;
 
-    @Column(name = "date_of_birth")
+    @NotBlank
     private String dateOfBirth;
 
-    @Column(nullable = false, length = 255)
+    @NotBlank
+    @Size(min = 8, max = 40)
     private String password;
 
-    @Column(nullable = false)
-    private boolean enabled = true;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
+    private Long houseId;
 
     public String getFirstName() {
         return firstName;
@@ -52,6 +44,14 @@ public class Client {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -77,12 +77,12 @@ public class Client {
     public void setPassword(String password) {
         this.password = password;
     }
-    public boolean isEnabled() {
-        return enabled;
+
+    public Long getHouseId() {
+        return houseId;
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setHouseId(Long houseId) {
+        this.houseId = houseId;
     }
-
 }
