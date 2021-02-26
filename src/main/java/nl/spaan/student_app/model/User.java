@@ -48,6 +48,20 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
+    @OneToMany(
+            mappedBy = "user",
+            fetch = FetchType.EAGER,
+            cascade =  CascadeType.ALL)
+    private Set<Declaration> declaration;
+
+    public Set<Declaration> getDeclaration() {
+        return declaration;
+    }
+
+    public void setDeclaration(Set<Declaration> declaration) {
+        this.declaration = declaration;
+    }
+
     public User() {
     }
 
@@ -123,6 +137,8 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+
 
 }
 

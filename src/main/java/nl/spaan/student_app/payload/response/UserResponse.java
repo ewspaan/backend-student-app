@@ -1,16 +1,17 @@
 package nl.spaan.student_app.payload.response;
 
-import java.util.List;
-
-public class JwtInlogResponse {
+public class UserResponse {
 
     private long id;
     private String username;
     private String firstName;
+    private String lastName;
     private String email;
+    private String dateOfBirth;
+    private String houseName;
     private String roles;
 
-    public JwtInlogResponse(long id, String username, String firstName, String email, String roles) {
+    public UserResponse(long id, String username, String firstName, String email, String roles) {
         this.id = id;
         this.username = username;
         this.firstName = firstName;
@@ -56,6 +57,30 @@ public class JwtInlogResponse {
 
     public String getRoles() {
         return roles;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getHouseName() {
+        return houseName;
+    }
+
+    public void setHouseName(String houseName) {
+        this.houseName = houseName;
     }
 
 }

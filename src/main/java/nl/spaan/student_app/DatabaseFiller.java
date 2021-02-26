@@ -1,5 +1,6 @@
 package nl.spaan.student_app;
 
+import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.service.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +37,6 @@ public class DatabaseFiller implements CommandLineRunner {
         ralph.setDateOfBirth("04-10-1978");
         ralph.setPassword("password");
         authorizationService.registerUser(ralph);
+
     }
 }

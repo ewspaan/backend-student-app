@@ -72,20 +72,20 @@ public class AuthorizationService {
 
     public ResponseEntity<MessageResponse> registerUser(@Valid SignupRequest signUpRequest) {
         if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))) {
-            System.out.println(signUpRequest.getUsername());
+            System.out.println("Username used-->");
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Username of Email is al in gebruik"));
         }
 
         if (Boolean.TRUE.equals(userRepository.existsByEmail(signUpRequest.getEmail()))) {
-            System.out.println(signUpRequest.getEmail());
+            System.out.println("email used-->");
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Username of Email is al in gebruik"));
         }
 
-        // Create new users account samen met new house account.
+        // Create new users account samen met nieuw house account.
         House house = new House();
 
         User user = new User();

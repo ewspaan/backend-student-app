@@ -6,8 +6,9 @@ import nl.spaan.student_app.model.House;
 import nl.spaan.student_app.model.User;
 import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.UpdateUserRequest;
-import nl.spaan.student_app.payload.response.JwtInlogResponse;
+import nl.spaan.student_app.payload.response.UserResponse;
 import nl.spaan.student_app.payload.response.MessageResponse;
+import nl.spaan.student_app.repository.HouseRepository;
 import nl.spaan.student_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,22 @@ public class UserServiceImpl implements UserService {
     @Value("${spaan.sec.jwtSecret}")
     private String jwtSecret;
 
+    @Value("${spaan.sec.emailHost}")
+    private String emailHost;
+
+    @Value("${spaan.sec.emailPort}")
+    private int emailPort;
+
+    @Value("${spaan.sec.emailUserName}")
+    private String emailUserName;
+
+    @Value("${spaan.sec.emailPassword}")
+    private String emailPassword;
+
     private static final String PREFIX = "Bearer ";
 
     private UserRepository userRepository;
+    private HouseRepository houseRepository;
     private PasswordEncoder encoder;
 
     @Override
@@ -48,40 +62,77 @@ public class UserServiceImpl implements UserService {
         }
         String username =  getUsernameFromToken(token);
 
+        System.out.println("Bla update--> " + username);
         if(userExists(username) && updateRequestIsValid(userRequest)) {
+            System.out.println("Bla update-2-> " + username);
             User updatedUser = findUserByUsername(username);
-            if(!userRequest.getPassword().isEmpty() && !userRequest.getRepeatedPassword().isEmpty()) {
+
+
+            if(userRequest.getFirstName() != null && !userRequest.getFirstName().isEmpty()) {
+                updatedUser.setFirstName(userRequest.getFirstName());
+            }
+            if(userRequest.getLastName() != null && !userRequest.getLastName().isEmpty()) {
+                updatedUser.setLastName(userRequest.getLastName());
+            }
+
+            if(userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) {
+                System.out.println("Bla update-3 2-> " + username);
+                if(!userRepository.existsByEmail(userRequest.getEmail())){
+                    updatedUser.setEmail(userRequest.getEmail());
+                    System.out.println("Bla update-email-> ");
+                }
+            }
+            if(userRequest.getDateOfBirth() != null && !userRequest.getDateOfBirth().isEmpty()) {
+                updatedUser.setDateOfBirth(userRequest.getDateOfBirth());
+            }
+            if(userRequest.getPassword() != null && !userRequest.getPassword().isEmpty()) {
                 updatedUser.setPassword(encoder.encode(userRequest.getPassword()));
             }
-            if(userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) {
-                updatedUser.setEmail(userRequest.getEmail());
+            //voorlopig is het niet mogelijk om username te updaten ivm met jwt token
+            if(userRequest.getUsername() != null && !userRequest.getUsername().isEmpty()) {
+                if(!userRepository.existsByUsername(userRequest.getUsername())){
+                    return ResponseEntity.badRequest().body(new MessageResponse("User cannot be updated with provided data."));
+                }
             }
-            return ResponseEntity.ok().body(userRepository.save(updatedUser));
+            userRepository.save(updatedUser);
+            return ResponseEntity.ok().body("User succesvol geupdate");
         }
 
         return ResponseEntity.badRequest().body(new MessageResponse("User cannot be updated with provided data."));
     }
 
+    //autoriseer User met behulp van token
     @Override
-    public ResponseEntity<?> findUserByToken(String token) {
+    public ResponseEntity<?> getUserByToken(String token) {
         String username = getUsernameFromToken(token);
 
         if(userExists(username)) {
-            System.out.println("USI FUBT 3--> " + ResponseEntity.ok(findUserByUsername(username)));
             User user = findUserByUsername(username);
-            List<String> roles = user.getRoles().stream()
-                    .map(role -> (role.getName().name()))
-                    .collect(Collectors.toList());
-            String role = roles.get(0);
-            JwtInlogResponse jwtInlogResponse = new JwtInlogResponse(
-                                                user.getId(),
-                                                user.getUsername(),
-                                                user.getFirstName(),
-                                                user.getEmail(),
-                                                role);
+            UserResponse jwtInlogResponse = createCommonResponse(user);
             return ResponseEntity.ok(jwtInlogResponse);
         }
         return ResponseEntity.badRequest().body(new MessageResponse("User not found"));
+    }
+
+    @Override
+    public ResponseEntity<?> getUser(String token){
+        User user = findUserNameFromToken(token);
+
+        UserResponse profileResponse = createCommonResponse(user);
+
+        profileResponse.setLastName(user.getLastName());
+        profileResponse.setDateOfBirth(user.getDateOfBirth());
+
+        House house = user.getHouse();
+
+        String houseName = house.getHouseName();
+
+        if (houseName == null){
+            profileResponse.setHouseName("Huis heeft nog geen naam");
+        }else{
+            profileResponse.setHouseName(houseName);
+        }
+        return ResponseEntity.ok(profileResponse);
     }
 
 
@@ -93,7 +144,6 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.badRequest().body(new MessageResponse("Invalid token"));
         }
        if (Boolean.TRUE.equals(userRepository.existsByEmail(addRequest.getEmail()))) {
-            System.out.println(addRequest.getEmail());
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Username of Email is al in gebruik"));
@@ -112,15 +162,16 @@ public class UserServiceImpl implements UserService {
         newUser.setHouse(house);
         userRepository.save(newUser);
 
-        new EmailService("smtp.mailtrap.io",
-                2525, "3bfcf4b63b722e",
-                "4ded572b74701c",
+        new EmailServiceImpl(
+                emailHost,
+                emailPort,
+                emailUserName,
+                emailPassword,
                 newUser.getFirstName(),
                 newUser.getLastName(),
                 newUser.getEmail(),
-                house.getId());
-
-
+                house.getId()
+        );
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
@@ -143,16 +194,40 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean updateRequestIsValid(UpdateUserRequest updateUserRequest) {
-        if(updateUserRequest.getPassword().equals(updateUserRequest.getRepeatedPassword())) {
-            return true;
-        }
+            if (updateUserRequest.getPassword() == updateUserRequest.getPasswordRepeat()) {
+                return true;
+            }
         return false;
+    }
+    @Override
+    public User findUserNameFromToken(String token) {
+        String username = getUsernameFromToken(token);
+        User user = new User();
+        if(userExists(username)) {
+            user = findUserByUsername(username);
+            System.out.println("User-->  " + user.getUsername());
+        }
+        return(user);
     }
 
     private User findUserByUsername(String username) {
 
-        System.out.println("USI fubun--> " + userRepository.findByUsername(username).get().getUsername());
         return userRepository.findByUsername(username).get();
+    }
+
+    private UserResponse createCommonResponse(User user){
+
+            List<String> roles = user.getRoles().stream()
+                    .map(role -> (role.getName().name()))
+                    .collect(Collectors.toList());
+            String role = roles.get(0);
+            UserResponse userResponse = new UserResponse(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getFirstName(),
+                    user.getEmail(),
+                    role);
+            return userResponse;
     }
 
 
@@ -166,4 +241,8 @@ public class UserServiceImpl implements UserService {
         this.encoder = encoder;
     }
 
+    @Autowired
+    public void setHouseRepository(HouseRepository houseRepository) {
+        this.houseRepository = houseRepository;
+    }
 }

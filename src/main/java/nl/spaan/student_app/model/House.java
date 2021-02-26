@@ -21,7 +21,7 @@ public class House {
             strategy = "native"
     )
     @Column(columnDefinition = "serial")
-    private Long id;
+    private long id;
     private String houseName;
     private String accountNumber;
 
@@ -31,15 +31,25 @@ public class House {
             cascade =  CascadeType.ALL)
     private Set<User> userList;
 
+    @OneToOne(mappedBy = "house", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private Account account;
+
+    @OneToMany(
+            mappedBy = "house",
+            fetch = FetchType.EAGER,
+            cascade =  CascadeType.ALL)
+    private Set<HouseBill> houseBill;
+
 
     public House() {
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -65,5 +75,29 @@ public class House {
 
     public void setUsers(Set<User> users) {
         this.userList = users;
+    }
+
+    public Set<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(Set<User> userList) {
+        this.userList = userList;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Set<HouseBill> getHouseBill() {
+        return houseBill;
+    }
+
+    public void setHouseBill(Set<HouseBill> houseBill) {
+        this.houseBill = houseBill;
     }
 }
