@@ -1,76 +1,56 @@
 package nl.spaan.student_app.controller;
 
-import nl.spaan.student_app.exeption.BadRequestException;
-import nl.spaan.student_app.model.User;
+
+import nl.spaan.student_app.payload.request.AddRequest;
+import nl.spaan.student_app.payload.request.UpdateUserRequest;
 import nl.spaan.student_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.Map;
 
+
+
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping(value = "/users")
+@RequestMapping(value = "/api/users")
 public class UserController {
 
-    @Autowired
+
     private UserService userService;
 
-    @GetMapping(value = "")
-    public ResponseEntity<Object> getUsers() {
-        return ResponseEntity.ok().body(userService.getUsers());
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
-    @GetMapping(value = "/{username}")
-    public ResponseEntity<Object> getUser(@PathVariable("username") String username) {
-        return ResponseEntity.ok().body(userService.getUser(username));
+    @PostMapping("/update")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> updateUser(@RequestHeader Map<String, String> headers,
+                                        @RequestBody UpdateUserRequest updateRequest) {
+        return userService.updateUserById(headers.get("authorization"), updateRequest);
     }
 
-    @PostMapping(value = "")
-    public ResponseEntity<Object> createKlant(@RequestBody User user) {
-        String newUsername = userService.createUser(user);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                .buildAndExpand(newUsername).toUri();
-
-        return ResponseEntity.created(location).build();
+    @GetMapping("/jwtlogin")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> findUserByToken(@RequestHeader Map<String, String> headers) {
+       return userService.getUserByToken(headers.get("authorization"));
     }
 
-    @PutMapping(value = "/{username}")
-    public ResponseEntity<Object> updateKlant(@PathVariable("username") String username, @RequestBody User user) {
-        userService.updateUser(username, user);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/download")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> getUser(@RequestHeader Map<String, String> headers) {
+        return userService.getUser(headers.get("authorization"));
     }
 
-    @DeleteMapping(value = "/{username}")
-    public ResponseEntity<Object> deleteKlant(@PathVariable("username") String username) {
-        userService.deleteUser(username);
-        return ResponseEntity.noContent().build();
-    }
 
-    @GetMapping(value = "/{username}/authorities")
-    public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
-        return ResponseEntity.ok().body(userService.getAuthorities(username));
+    @PostMapping( "/roommate")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> addUserToHouse(@RequestHeader Map<String, String> headers,
+                                            @RequestBody AddRequest addRequest) {
+        return userService.addUserToHouse(headers.get("authorization"), addRequest);
     }
-
-    @PostMapping(value = "/{username}/authorities")
-    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
-        try {
-            String authorityName = (String) fields.get("authority");
-            userService.addAuthority(username, authorityName);
-            return ResponseEntity.noContent().build();
-        }
-        catch (Exception ex) {
-            throw new BadRequestException();
-        }
-    }
-
-    @DeleteMapping(value = "/{username}/authorities/{authority}")
-    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
-        userService.removeAuthority(username, authority);
-        return ResponseEntity.noContent().build();
-    }
-
 }

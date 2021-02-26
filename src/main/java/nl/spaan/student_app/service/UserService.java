@@ -1,22 +1,28 @@
 package nl.spaan.student_app.service;
 
-import nl.spaan.student_app.model.Authority;
+
 import nl.spaan.student_app.model.User;
+import nl.spaan.student_app.payload.request.AddRequest;
+import nl.spaan.student_app.payload.request.UpdateUserRequest;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
+
+
+@Service
+@Validated
 public interface UserService {
 
-    public abstract String createUser(User user);
-    public abstract void updateUser(String username, User user);
-    public abstract void deleteUser(String username);
-    public abstract Collection<User> getUsers();
-    public abstract Optional<User> getUser(String username);
-    public abstract boolean userExists(String username);
-    public abstract Set<Authority> getAuthorities(String username);
-    public abstract void addAuthority(String username, String authority);
-    public abstract void removeAuthority(String username, String authority);
+    ResponseEntity<?> getAllUsers();
+    ResponseEntity<?> updateUserById(String token,  @Valid UpdateUserRequest userRequest);
+    ResponseEntity<?> getUserByToken(String token);
+    ResponseEntity<?> addUserToHouse(String token, AddRequest addRequest);
+    ResponseEntity<?> getUser(String authorization);
+
+    User findUserNameFromToken(String token);
+
 
 }
