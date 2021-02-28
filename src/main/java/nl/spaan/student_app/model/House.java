@@ -4,7 +4,7 @@ package nl.spaan.student_app.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -31,7 +31,13 @@ public class House {
             cascade =  CascadeType.ALL)
     private Set<User> userList;
 
-    @OneToOne(mappedBy = "house", cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "house",
+            fetch = FetchType.EAGER,
+            cascade =  CascadeType.ALL)
+    private Set<Declaration> declarations;
+
+    @OneToOne(mappedBy = "house")
     @PrimaryKeyJoinColumn
     private Account account;
 
@@ -39,11 +45,8 @@ public class House {
             mappedBy = "house",
             fetch = FetchType.EAGER,
             cascade =  CascadeType.ALL)
-    private Set<HouseBill> houseBill;
+    private List<BillHouse> billHouse;
 
-
-    public House() {
-    }
 
     public long getId() {
         return id;
@@ -93,11 +96,19 @@ public class House {
         this.account = account;
     }
 
-    public Set<HouseBill> getHouseBill() {
-        return houseBill;
+    public Set<Declaration> getDeclarations() {
+        return declarations;
     }
 
-    public void setHouseBill(Set<HouseBill> houseBill) {
-        this.houseBill = houseBill;
+    public void setDeclarations(Set<Declaration> declarations) {
+        this.declarations = declarations;
+    }
+
+    public List<BillHouse> getBillHouse() {
+        return billHouse;
+    }
+
+    public void setBillHouse(List<BillHouse> billHouse) {
+        this.billHouse = billHouse;
     }
 }

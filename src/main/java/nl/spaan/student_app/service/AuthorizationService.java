@@ -1,14 +1,12 @@
 package nl.spaan.student_app.service;
 
-import nl.spaan.student_app.model.ERole;
-import nl.spaan.student_app.model.House;
-import nl.spaan.student_app.model.Role;
-import nl.spaan.student_app.model.User;
+import nl.spaan.student_app.model.*;
 import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.LoginRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.payload.response.JwtResponse;
 import nl.spaan.student_app.payload.response.MessageResponse;
+import nl.spaan.student_app.repository.AccountRepository;
 import nl.spaan.student_app.repository.HouseRepository;
 import nl.spaan.student_app.repository.RoleRepository;
 import nl.spaan.student_app.repository.UserRepository;
@@ -37,6 +35,7 @@ public class AuthorizationService {
 
     private UserRepository userRepository;
     private HouseRepository houseRepository;
+    private AccountRepository accountRepository;
     private PasswordEncoder encoder;
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
@@ -66,6 +65,11 @@ public class AuthorizationService {
     }
 
     @Autowired
+    public void setAccountRepository(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
+
+    @Autowired
     public void setJwtUtils(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
     }
@@ -86,6 +90,7 @@ public class AuthorizationService {
         }
 
         // Create new users account samen met nieuw house account.
+        Account account = new Account("12345678",0,0,0,0);
         House house = new House();
 
         User user = new User();
@@ -103,7 +108,9 @@ public class AuthorizationService {
         roles.add(modRole);
         //System.out.println("Role first2-->" + roles);
         user.setRoles(roles);
-
+        house.setAccount(account);
+        account.setHouse(house);
+        accountRepository.save(account);
         houseRepository.save(house);
         userRepository.save(user);
 

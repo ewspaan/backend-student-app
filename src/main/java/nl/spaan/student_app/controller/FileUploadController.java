@@ -23,39 +23,20 @@ import java.util.Map;
 @RequestMapping(value = "/api/files")
 public class FileUploadController {
 
-    @Autowired
+
     private FileStorageService fileStorageService;
+
+    @Autowired
+    public void setFileStorageService(FileStorageService fileStorageService) {
+        this.fileStorageService = fileStorageService;
+    }
 
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
-    public ResponseEntity<UploadResponseMessage> uploadFile(@RequestParam("file") MultipartFile file,
-                                                            @RequestParam("amount") String amount,
-                                                            @RequestParam("date") String date,
-                                                            @RequestHeader Map<String, String> headers) {
-        String message = "";
-        String token = headers.get("authorization");
-        try {
-            fileStorageService.store( file,amount, date, token );
-            System.out.println("Bla einde");
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(new UploadResponseMessage(message));
-        } catch (Exception e) {
-            System.out.println("Bla foutje");
-            message = "Could not upload the file: " + file.getOriginalFilename() + "!";
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new UploadResponseMessage(message));
-        }
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file,
+                                        @RequestHeader Map<String, String> headers) {
+            return fileStorageService.store(file ,(headers.get("authorization")));
     }
 
 
-    @GetMapping(value = "/download/{id}")
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
-    public ResponseEntity<?> getFile(@PathVariable long id , HttpServletRequest request) {
-        return fileStorageService.getFile(id,request);
-    }
-
-    @DeleteMapping("/delete")
-    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
-    public void delete() {
-
-    }
 }

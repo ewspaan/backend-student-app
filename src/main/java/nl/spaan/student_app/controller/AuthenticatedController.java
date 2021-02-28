@@ -17,8 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticatedController {
 
 
-    @Autowired
+
     AuthorizationService authorizationService;
+
+    @Autowired
+    public void setAuthorizationService(AuthorizationService authorizationService) {
+        this.authorizationService = authorizationService;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<MessageResponse> registerUser(@RequestBody SignupRequest signUpRequest) {

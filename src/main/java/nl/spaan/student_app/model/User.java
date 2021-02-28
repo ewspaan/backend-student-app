@@ -6,6 +6,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -53,6 +54,13 @@ public class User {
             fetch = FetchType.EAGER,
             cascade =  CascadeType.ALL)
     private Set<Declaration> declaration;
+
+    @OneToMany(
+            mappedBy = "user",
+            fetch = FetchType.EAGER,
+            cascade =  CascadeType.ALL)
+    private List<BillUser> userBill;
+
 
     public Set<Declaration> getDeclaration() {
         return declaration;
@@ -138,6 +146,15 @@ public class User {
         this.roles = roles;
     }
 
+    public List<BillUser> getUserBill() {
+        return userBill;
+    }
+
+    public void setUserBill(List<BillUser> userBill) {
+        this.userBill = userBill;
+
+
+    }
 
 
 }
