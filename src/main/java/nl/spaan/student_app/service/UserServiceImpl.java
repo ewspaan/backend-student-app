@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // Voeg huisgenoot toe aan huis en genereer email met link naar signup pagine huisgenoot
+    // Voeg huisgenoot toe aan huis en genereer email met link naar signup pagina huisgenoot
     @Override
     public ResponseEntity<?> addUserToHouse( String token, AddRequest addRequest) {
         //TODO email sturen bij al in gebruik zijnde email
@@ -194,9 +194,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean updateRequestIsValid(UpdateUserRequest updateUserRequest) {
-            if (updateUserRequest.getPassword() == updateUserRequest.getPasswordRepeat()) {
-                return true;
-            }
+        //als beide password velden leeg zijn hoeft het password niet veranderd te worden.
+        if(updateUserRequest.getPasswordRepeat() == null && updateUserRequest.getPassword() == null) {
+            return true;
+        }
+        if (updateUserRequest.getPassword().equals(updateUserRequest.getPasswordRepeat())) {
+            return true;
+        }
         return false;
     }
     @Override

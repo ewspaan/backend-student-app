@@ -4,19 +4,16 @@ public class DeclarationResponse {
 
     private String firstName;
     private String lastName;
-    private String username;
-    private long declarationId;
-    private String fileURL;
-    private long fileId;
+    private double amount;
+    private String fileName;
 
-    public DeclarationResponse(String firstName, String lastName, String username, long declarationId, String fileURL, long fileId) {
+    public DeclarationResponse(String firstName, String lastName, double amount) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.username = username;
-        this.declarationId = declarationId;
-        this.fileURL = fileURL;
-        this.fileId = fileId;
+        this.amount = amount;
+
     }
+
 
     public String getFirstName() {
         return firstName;
@@ -34,35 +31,19 @@ public class DeclarationResponse {
         this.lastName = lastName;
     }
 
-    public String getUsername() {
-        return username;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
-    public long getDeclarationId() {
-        return declarationId;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setDeclarationId(long declarationId) {
-        this.declarationId = declarationId;
-    }
-
-    public String getFileURL() {
-        return fileURL;
-    }
-
-    public void setFileURL(String fileURL) {
-        this.fileURL = fileURL;
-    }
-
-    public long getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(long fileId) {
-        this.fileId = fileId;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

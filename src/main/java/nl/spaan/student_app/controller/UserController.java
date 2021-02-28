@@ -29,8 +29,8 @@ public class UserController {
     @PostMapping("/update")
     @PreAuthorize("hasRole('MODERATOR')")
     public ResponseEntity<?> updateUser(@RequestHeader Map<String, String> headers,
-                                        @RequestBody UpdateUserRequest updateRequest) {
-        return userService.updateUserById(headers.get("authorization"), updateRequest);
+                                        @RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUserById(headers.get("authorization"), updateUserRequest);
     }
 
 

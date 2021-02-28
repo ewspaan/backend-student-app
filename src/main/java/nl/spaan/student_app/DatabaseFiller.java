@@ -21,20 +21,20 @@ public class DatabaseFiller implements CommandLineRunner {
     public void run(String... args){
 
         SignupRequest erwin = new SignupRequest();
-        erwin.setFirstName("Erwin");
-        erwin.setLastName("Spaan");
+        erwin.setFirstName("Bla");
+        erwin.setLastName("Blatenstein");
         erwin.setUsername("ews");
-        erwin.setEmail("ewspaan@gmail.com");
-        erwin.setDateOfBirth("11-11-1977");
+        erwin.setEmail("kansloos@gmail.com");
+        erwin.setDateOfBirth("01-02-2000");
         erwin.setPassword("password");
         authorizationService.registerUser(erwin);
 
         SignupRequest ralph = new SignupRequest();
-        ralph.setFirstName("Ralph");
-        ralph.setLastName("Spaan");
-        ralph.setUsername("rjs");
-        ralph.setEmail("rjspaan@gmail.com");
-        ralph.setDateOfBirth("04-10-1978");
+        ralph.setFirstName("Bladibla");
+        ralph.setLastName("van Bla");
+        ralph.setUsername("bla");
+        ralph.setEmail("kansarm@gmail.com");
+        ralph.setDateOfBirth("03-04-2001");
         ralph.setPassword("password");
         authorizationService.registerUser(ralph);
 

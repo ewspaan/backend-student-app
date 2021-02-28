@@ -23,24 +23,16 @@ public class FileDB {
     private String nameFile;
     private String type;
     private String filePath;
-    private byte[] data;
-    private File uploadedFile;
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "declaration_id")
-    private Declaration declaration;
 
     public FileDB() {
     }
 
-    public FileDB(String name, String type, String filePath, File uploadedFile, byte[] data) {
+    public FileDB(String name, String type, String filePath) {
         this.nameFile = name;
         this.type = type;
         this.filePath = filePath;
-        this.uploadedFile = uploadedFile;
-        this.data = data;
     }
+
 
     public Long getId() {
         return id;
@@ -74,27 +66,4 @@ public class FileDB {
         this.filePath = filePath;
     }
 
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
-    public Declaration getDeclaration() {
-        return declaration;
-    }
-
-    public void setDeclaration(Declaration declaration) {
-        this.declaration = declaration;
-    }
-
-    public File getUploadedFile() {
-        return uploadedFile;
-    }
-
-    public void setUploadedFile(File uploadedFile) {
-        this.uploadedFile = uploadedFile;
-    }
 }

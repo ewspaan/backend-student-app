@@ -26,11 +26,34 @@ public class Account {
     private double gasUtility;
     private double elektraUtility;
     private double internetUtility;
+    private double totalAmountUtilities;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "house_id")
     private House house;
+
+    public Account() {
+    }
+
+    public Account(String accountNumber, double waterUtility, double gasUtility, double elektraUtility, double internetUtility, House house) {
+        this.accountNumber = accountNumber;
+        this.waterUtility = waterUtility;
+        this.gasUtility = gasUtility;
+        this.elektraUtility = elektraUtility;
+        this.internetUtility = internetUtility;
+        this.house = house;
+    }
+
+    public Account(String accountNumber, double waterUtility, double gasUtility, double elektraUtility, double internetUtility) {
+        this.accountNumber = accountNumber;
+        this.waterUtility = waterUtility;
+        this.gasUtility = gasUtility;
+        this.elektraUtility = elektraUtility;
+        this.internetUtility = internetUtility;
+    }
+
+
 
     public long getId() {
         return id;
@@ -78,6 +101,14 @@ public class Account {
 
     public void setInternetUtility(double internetUtility) {
         this.internetUtility = internetUtility;
+    }
+
+    public double getTotalAmountUtilities() {
+        return totalAmountUtilities;
+    }
+
+    public void setTotalAmountUtilities(double totalAmountUtilities) {
+        this.totalAmountUtilities = totalAmountUtilities;
     }
 
     public House getHouse() {

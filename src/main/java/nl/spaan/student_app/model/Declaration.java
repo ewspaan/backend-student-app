@@ -31,9 +31,9 @@ public class Declaration {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(mappedBy = "declaration", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private FileDB fileDB;
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name = "house_id", nullable = false)
+    private House house;
 
     public Declaration() {
     }
@@ -86,14 +86,6 @@ public class Declaration {
         this.user = user;
     }
 
-    public FileDB getFileDB() {
-        return fileDB;
-    }
-
-    public void setFileDB(FileDB fileDB) {
-        this.fileDB = fileDB;
-    }
-
     public boolean isChecked() {
         return checked;
     }
@@ -108,5 +100,13 @@ public class Declaration {
 
     public void setCorrect(boolean correct) {
         this.correct = correct;
+    }
+
+    public House getHouse() {
+        return house;
+    }
+
+    public void setHouse(House house) {
+        this.house = house;
     }
 }
