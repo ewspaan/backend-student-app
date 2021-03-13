@@ -35,8 +35,10 @@ public class Declaration {
     @JoinColumn(name = "house_id", nullable = false)
     private House house;
 
-    public Declaration() {
-    }
+    @OneToOne(mappedBy = "declaration", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private FileDB fileDB;
+
 
     public long getId() {
         return id;
@@ -108,5 +110,13 @@ public class Declaration {
 
     public void setHouse(House house) {
         this.house = house;
+    }
+
+    public FileDB getFileDB() {
+        return fileDB;
+    }
+
+    public void setFileDB(FileDB fileDB) {
+        this.fileDB = fileDB;
     }
 }

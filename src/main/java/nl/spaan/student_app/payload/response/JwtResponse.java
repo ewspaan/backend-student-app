@@ -1,7 +1,6 @@
 package nl.spaan.student_app.payload.response;
 
 
-import java.util.List;
 
 public class JwtResponse {
 

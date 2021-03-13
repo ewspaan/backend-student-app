@@ -23,7 +23,6 @@ public class House {
     @Column(columnDefinition = "serial")
     private long id;
     private String houseName;
-    private String accountNumber;
 
     @OneToMany(
             mappedBy = "house",
@@ -63,15 +62,7 @@ public class House {
     public void setHouseName(String houseName) {
         this.houseName = houseName;
     }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
+    
     public Set<User> getUsers() {
         return userList;
     }

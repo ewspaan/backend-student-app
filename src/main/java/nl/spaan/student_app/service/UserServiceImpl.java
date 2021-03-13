@@ -6,6 +6,7 @@ import nl.spaan.student_app.model.House;
 import nl.spaan.student_app.model.User;
 import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.UpdateUserRequest;
+import nl.spaan.student_app.payload.response.DeclarationResponse;
 import nl.spaan.student_app.payload.response.UserResponse;
 import nl.spaan.student_app.payload.response.MessageResponse;
 import nl.spaan.student_app.repository.HouseRepository;
@@ -17,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,14 +48,26 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder encoder;
 
     @Override
-    public ResponseEntity<?> getAllUsers() {
+    public ResponseEntity<?> getAllRoommates(String token) {
 
-        List<User> users = userRepository.findAll();
+        User user = findUserNameFromToken(token);
+        System.out.println("bla1234");
+
+        List<User> users = userRepository.findAllByHouseId(user.getHouse().getId());
 
         if(users.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("No Users found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Geen huisgenoten gevonden"));
         }
-        return ResponseEntity.ok(users);
+        System.out.println("Users--> " + users.get(0).getFirstName());
+        List<UserResponse> roommates = new ArrayList<>();
+        for ( int i = 0; i< users.size(); i++ ){
+            UserResponse userResponse = new UserResponse();
+            userResponse.setUsername(users.get(i).getUsername());
+            userResponse.setFirstName(users.get(i).getFirstName());
+            userResponse.setLastName(users.get(i).getLastName());
+            roommates.add(userResponse);
+        }
+        return ResponseEntity.ok(roommates);
     }
 
     @Override
@@ -120,18 +135,13 @@ public class UserServiceImpl implements UserService {
 
         UserResponse profileResponse = createCommonResponse(user);
 
-        profileResponse.setLastName(user.getLastName());
-        profileResponse.setDateOfBirth(user.getDateOfBirth());
-
+        System.out.println("profileResponse" + profileResponse.getAccountNumber());
         House house = user.getHouse();
 
         String houseName = house.getHouseName();
 
-        if (houseName == null){
-            profileResponse.setHouseName("Huis heeft nog geen naam");
-        }else{
-            profileResponse.setHouseName(houseName);
-        }
+        profileResponse.setHouseName(Objects.requireNonNullElse(houseName, "Huis heeft nog geen naam"));
+
         return ResponseEntity.ok(profileResponse);
     }
 
@@ -225,12 +235,20 @@ public class UserServiceImpl implements UserService {
                     .map(role -> (role.getName().name()))
                     .collect(Collectors.toList());
             String role = roles.get(0);
-            UserResponse userResponse = new UserResponse(
-                    user.getId(),
-                    user.getUsername(),
-                    user.getFirstName(),
-                    user.getEmail(),
-                    role);
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(user.getId());
+            userResponse.setUsername(user.getUsername());
+            userResponse.setFirstName(user.getFirstName());
+            userResponse.setLastName(user.getLastName());
+            userResponse.setEmail(user.getEmail());
+            userResponse.setDateOfBirth(user.getDateOfBirth());
+            userResponse.setRoles(role);
+            userResponse.setHouseName(user.getHouse().getHouseName());
+            userResponse.setAccountNumber(user.getHouse().getAccount().getAccountNumber());
+            userResponse.setWaterUtility(user.getHouse().getAccount().getWaterUtility());
+            userResponse.setGasUtility(user.getHouse().getAccount().getGasUtility());
+            userResponse.setElektraUtility(user.getHouse().getAccount().getElektraUtility());
+            userResponse.setInternetUtility(user.getHouse().getAccount().getInternetUtility());
             return userResponse;
     }
 

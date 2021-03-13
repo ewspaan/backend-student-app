@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Transactional
@@ -66,17 +67,20 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest) {
+    public ResponseEntity<?> storeDeclaration(String token, String amount, MultipartFile file) {
 
         /*Bij het binnenkomen van een declaratie wordt eerst gekeken of er voor die maand al een huisrekening is gemaakt.
-          Is die er niet dan wordt die aangemaakt. Dan wordt er gekeken of de user al een huisrekening boor die maand heeft.
+          Is die er niet dan wordt die aangemaakt. Dan wordt er gekeken of de user al een huisrekening voor die maand heeft.
           Is die er niet wordt die aangemaakt.
           Declaratie wordt toegevoegd aan huisrekening algemeen en huisrekening user.
         */
-        System.out.println("bla-->" + declarationRequest.getAmount());
-        System.out.println("bla-->" + declarationRequest.getYear());
-        System.out.println("bla-->" + declarationRequest.getMonth());
-        System.out.println("bla-->" + declarationRequest.getFileName());
+
+        LocalDate date = LocalDate.now();
+        int month = date.getMonthValue();
+        int year = date.getYear();
+        //Todo check voor juiste string
+        double amountDouble = Double.parseDouble(amount);
+        System.out.println("bla " + amountDouble + "  " + amount);
 
         User user = userService.findUserNameFromToken(token);
         BillHouse billHouse = new BillHouse();
@@ -86,44 +90,45 @@ public class DeclarationServiceImpl implements DeclarationService {
         List<BillUser> userBills = user.getUserBill();
 
         for(int i = 0; i < houseBills.size(); i++){
-            if(houseBills.get(i).getMonth() == declarationRequest.getMonth() && houseBills.get(i).getYear() == declarationRequest.getYear()){
+            if(houseBills.get(i).getMonth() == month && houseBills.get(i).getYear() == year){
                 billHouse = houseBills.get(i);
             }
         }
-        System.out.println("bla" + billHouse.getYear());
+        System.out.println("bla " + billHouse.getYear());
         if (billHouse.getYear() == 0)
         {
             billHouse.setHouse(user.getHouse());
-            billHouse.setMonth(declarationRequest.getMonth());
-            billHouse.setYear(declarationRequest.getYear());
+            billHouse.setMonth(month);
+            billHouse.setYear(year);
             billHouse.setTotalUtilities(user.getHouse().getAccount().getTotalAmountUtilities());
 
         }
         System.out.println("bla");
         for(int i = 0; i < userBills.size(); i++){
-            if(userBills.get(i).getMonth() == declarationRequest.getMonth() && userBills.get(i).getYear() == declarationRequest.getYear() ){
+            if(userBills.get(i).getMonth() == month && userBills.get(i).getYear() == year ){
                 billUser = userBills.get(i);
             }
         }
 
         if (billUser.getYear() == 0){
             billUser.setUser(user);
-            billUser.setMonth(declarationRequest.getMonth());
-            billUser.setYear(declarationRequest.getYear());
+            billUser.setMonth(month);
+            billUser.setYear(year);
             billUser.setTotalAmount(billHouse.getTotalAmount());
 
         }
         //verhoog het totaal van de gedeclareerde boodschappen
-        billHouse.setTotalDeclarations(billHouse.getTotalDeclarations() + declarationRequest.getAmount());
-        billUser.setTotalDeclarations(billUser.getTotalDeclarations() + declarationRequest.getAmount());
+        billHouse.setTotalDeclarations(billHouse.getTotalDeclarations() + amountDouble);
+        billUser.setTotalDeclarations(billUser.getTotalDeclarations() + amountDouble);
 
         declaration.setHouse(user.getHouse());
         declaration.setUser(user);
-        declaration.setMonth(declarationRequest.getMonth());
-        declaration.setYear(declarationRequest.getYear());
-        declaration.setGroceriesAmount(declarationRequest.getAmount());
+        declaration.setMonth(month);
+        declaration.setYear(year);
+        declaration.setGroceriesAmount(amountDouble);
         declaration.setCorrect(false);
         declaration.setChecked(false);
+        fileStorageService.store(file,token,declaration);
 
         billRepository.save(billUser);
         billRepository.save(billHouse);

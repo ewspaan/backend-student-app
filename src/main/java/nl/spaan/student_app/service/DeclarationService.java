@@ -12,7 +12,7 @@ import java.io.IOException;
 public interface DeclarationService {
 
 
-    ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest);
+    ResponseEntity<?> storeDeclaration(String token,String amount, MultipartFile file);
 
     ResponseEntity<?> getAllDeclarations(String authorization);
 }

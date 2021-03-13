@@ -24,6 +24,11 @@ public class FileDB {
     private String type;
     private String filePath;
 
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "declaration_id")
+    private Declaration declaration;
+
     public FileDB() {
     }
 
@@ -66,4 +71,11 @@ public class FileDB {
         this.filePath = filePath;
     }
 
+    public Declaration getDeclaration() {
+        return declaration;
+    }
+
+    public void setDeclaration(Declaration declaration) {
+        this.declaration = declaration;
+    }
 }

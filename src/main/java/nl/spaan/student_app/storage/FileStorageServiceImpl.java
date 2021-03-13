@@ -99,5 +99,43 @@ public class FileStorageServiceImpl implements FileStorageService {
 		fileDBRepository.save(fileDB);
 		return ResponseEntity.ok(fileNameCustom);
 	}
+	@Override
+	public ResponseEntity<?> store(MultipartFile file, String token , Declaration declaration)  {
+
+		if  (file.isEmpty()) {
+			throw new StorageException("Failed to store empty file.");
+		}
+
+		String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+		String fileNameCustom = userService.findUserNameFromToken(token).getUsername();
+		fileNameCustom = fileNameCustom + java.time.LocalDateTime.now();
+		fileNameCustom = fileNameCustom.replace(":","_")
+				.replace(" ", "")
+				.replace(".", "_")+fileName;
+
+		Path targetLocation = this.fileStorageLocation.resolve(fileNameCustom);
+
+		try {
+			Files.createDirectories(this.fileStorageLocation);
+			// check of de file een geen onjuiste tekens bevat
+			if(fileName.contains("..")) {
+				throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+			}
+			// Sla file op vervang als het dezelfde naam heeft
+			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException ex) {
+			throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
+		}
+		FileDB fileDB = new FileDB();
+		fileDB.setFilePath(targetLocation.toString());
+		fileDB.setNameFile(fileNameCustom);
+		fileDB.setDeclaration(declaration);
+		fileDBRepository.save(fileDB);
+		return ResponseEntity.ok(fileNameCustom);
+	}
+
+
+
+
 
 }

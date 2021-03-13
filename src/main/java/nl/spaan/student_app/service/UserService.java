@@ -16,7 +16,7 @@ import javax.validation.Valid;
 @Validated
 public interface UserService {
 
-    ResponseEntity<?> getAllUsers();
+    ResponseEntity<?> getAllRoommates(String token);
     ResponseEntity<?> updateUserById(String token,  @Valid UpdateUserRequest userRequest);
     ResponseEntity<?> getUserByToken(String token);
     ResponseEntity<?> addUserToHouse(String token, AddRequest addRequest);
