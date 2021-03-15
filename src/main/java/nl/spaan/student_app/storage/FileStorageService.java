@@ -17,6 +17,5 @@ public interface FileStorageService {
 
     ResponseEntity<?> store(MultipartFile file, String token);
 
-
-    ResponseEntity<?> store(MultipartFile file, String token, Declaration declaration);
+    ResponseEntity<?> store(String file, String token, Declaration declaration);
 }

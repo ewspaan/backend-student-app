@@ -67,20 +67,20 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public ResponseEntity<?> storeDeclaration(String token, String amount, MultipartFile file) {
+    public ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest) {
 
         /*Bij het binnenkomen van een declaratie wordt eerst gekeken of er voor die maand al een huisrekening is gemaakt.
           Is die er niet dan wordt die aangemaakt. Dan wordt er gekeken of de user al een huisrekening voor die maand heeft.
           Is die er niet wordt die aangemaakt.
           Declaratie wordt toegevoegd aan huisrekening algemeen en huisrekening user.
         */
-
+        System.out.println("bla " + declarationRequest.getFileName() + "  " + declarationRequest.getAmount());
         LocalDate date = LocalDate.now();
         int month = date.getMonthValue();
         int year = date.getYear();
         //Todo check voor juiste string
-        double amountDouble = Double.parseDouble(amount);
-        System.out.println("bla " + amountDouble + "  " + amount);
+        double amountDouble = Double.parseDouble(declarationRequest.getAmount());
+
 
         User user = userService.findUserNameFromToken(token);
         BillHouse billHouse = new BillHouse();
@@ -128,7 +128,7 @@ public class DeclarationServiceImpl implements DeclarationService {
         declaration.setGroceriesAmount(amountDouble);
         declaration.setCorrect(false);
         declaration.setChecked(false);
-        fileStorageService.store(file,token,declaration);
+        fileStorageService.store(declarationRequest.getFileName(),token,declaration);
 
         billRepository.save(billUser);
         billRepository.save(billHouse);
@@ -162,7 +162,7 @@ public class DeclarationServiceImpl implements DeclarationService {
                         user.getFirstName(),
                         user.getLastName(),
                         declaration.getGroceriesAmount(),
-                        fileDB.getFilePath());
+                        fileDB.getNameFile());
                 declarationResponses.add(declarationResponse);
             }
         }
