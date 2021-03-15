@@ -15,7 +15,7 @@ public class BillHouse extends Bill{
         private double totalDeclarations;
 
 
-        @ManyToOne(fetch=FetchType.EAGER)
+        @ManyToOne
         @JoinColumn(name = "house_id", nullable = false)
         private House house;
 

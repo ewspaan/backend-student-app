@@ -184,6 +184,17 @@ public class UserServiceImpl implements UserService {
         );
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
+    @Override
+    public ResponseEntity<?> deleteUser(String username){
+
+        if (userExists(username)){
+            User user = findUserByUsername(username);
+            userRepository.deleteById(user.getId());
+            System.out.println("delete--> " + username);
+        }
+        return ResponseEntity.ok("Huisgenoot verwijdert");
+    }
+
 
     private String getUsernameFromToken(String token) {
         String tokenWithoutBearer = removePrefix(token);
@@ -223,6 +234,7 @@ public class UserServiceImpl implements UserService {
         }
         return(user);
     }
+
 
     private User findUserByUsername(String username) {
 

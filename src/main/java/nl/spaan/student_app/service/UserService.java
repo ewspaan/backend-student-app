@@ -25,4 +25,5 @@ public interface UserService {
     User findUserNameFromToken(String token);
 
 
+    ResponseEntity<?> deleteUser(String username);
 }

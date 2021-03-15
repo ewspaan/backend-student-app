@@ -94,6 +94,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
 		}
 		FileDB fileDB = new FileDB();
+		System.out.println("path--> " + targetLocation.toString());
 		fileDB.setFilePath(targetLocation.toString());
 		fileDB.setNameFile(fileNameCustom);
 		fileDBRepository.save(fileDB);

@@ -26,15 +26,13 @@ public class House {
 
     @OneToMany(
             mappedBy = "house",
-            fetch = FetchType.EAGER,
-            cascade =  CascadeType.ALL)
-    private Set<User> userList;
+            fetch = FetchType.LAZY)
+    private List<User> userList;
 
     @OneToMany(
             mappedBy = "house",
-            fetch = FetchType.EAGER,
-            cascade =  CascadeType.ALL)
-    private Set<Declaration> declarations;
+            fetch = FetchType.LAZY)
+    private List<Declaration> declarations;
 
     @OneToOne(mappedBy = "house")
     @PrimaryKeyJoinColumn
@@ -42,10 +40,8 @@ public class House {
 
     @OneToMany(
             mappedBy = "house",
-            fetch = FetchType.EAGER,
-            cascade =  CascadeType.ALL)
+            fetch = FetchType.LAZY)
     private List<BillHouse> billHouse;
-
 
     public long getId() {
         return id;
@@ -62,21 +58,21 @@ public class House {
     public void setHouseName(String houseName) {
         this.houseName = houseName;
     }
-    
-    public Set<User> getUsers() {
+
+    public List<User> getUserList() {
         return userList;
     }
 
-    public void setUsers(Set<User> users) {
-        this.userList = users;
-    }
-
-    public Set<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(Set<User> userList) {
+    public void setUserList(List<User> userList) {
         this.userList = userList;
+    }
+
+    public List<Declaration> getDeclarations() {
+        return declarations;
+    }
+
+    public void setDeclarations(List<Declaration> declarations) {
+        this.declarations = declarations;
     }
 
     public Account getAccount() {
@@ -85,14 +81,6 @@ public class House {
 
     public void setAccount(Account account) {
         this.account = account;
-    }
-
-    public Set<Declaration> getDeclarations() {
-        return declarations;
-    }
-
-    public void setDeclarations(Set<Declaration> declarations) {
-        this.declarations = declarations;
     }
 
     public List<BillHouse> getBillHouse() {

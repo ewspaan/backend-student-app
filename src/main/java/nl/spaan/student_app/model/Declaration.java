@@ -27,15 +27,15 @@ public class Declaration {
     private boolean checked;
     private boolean correct;
 
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "house_id", nullable = false)
     private House house;
 
-    @OneToOne(mappedBy = "declaration", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private FileDB fileDB;
 

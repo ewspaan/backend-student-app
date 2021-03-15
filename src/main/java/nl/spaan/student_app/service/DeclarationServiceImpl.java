@@ -103,7 +103,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             billHouse.setTotalUtilities(user.getHouse().getAccount().getTotalAmountUtilities());
 
         }
-        System.out.println("bla");
+        System.out.println("bla decla");
         for(int i = 0; i < userBills.size(); i++){
             if(userBills.get(i).getMonth() == month && userBills.get(i).getYear() == year ){
                 billUser = userBills.get(i);
@@ -141,15 +141,13 @@ public class DeclarationServiceImpl implements DeclarationService {
     @Override
     public ResponseEntity<?> getAllDeclarations(String token) {
 
-        System.out.println("blabla");
-        List<Declaration> declarations = declarationRepository.findAll();
+        List<Declaration> declarations = declarationRepository.findAllByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
         List<Declaration> declarationsToCheck = new ArrayList<Declaration>();
         List<DeclarationResponse> declarationResponses= new ArrayList<>();
         if (!declarations.isEmpty()) {
             for (int i = 0; i < declarations.size(); i++) {
                 if (!declarations.get(i).isChecked()) {
                     declarationsToCheck.add(declarations.get(i));
-                    System.out.println(declarationsToCheck.get(i).isChecked());
                 }
             }
         }
@@ -160,9 +158,11 @@ public class DeclarationServiceImpl implements DeclarationService {
                 user = userRepository.findUserById(declaration.getUser().getId());
                 fileDB = fileDBRepository.findFileById(declaration.getId());
                 DeclarationResponse declarationResponse = new DeclarationResponse(
+                        declaration.getId(),
                         user.getFirstName(),
                         user.getLastName(),
-                        declaration.getGroceriesAmount());
+                        declaration.getGroceriesAmount(),
+                        fileDB.getFilePath());
                 declarationResponses.add(declarationResponse);
             }
         }

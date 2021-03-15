@@ -51,22 +51,22 @@ public class User {
 
     @OneToMany(
             mappedBy = "user",
-            fetch = FetchType.EAGER,
-            cascade =  CascadeType.ALL)
-    private Set<Declaration> declaration;
+            cascade =  CascadeType.ALL,
+            orphanRemoval = true)
+    private List<Declaration> declaration;
 
     @OneToMany(
             mappedBy = "user",
-            fetch = FetchType.EAGER,
-            cascade =  CascadeType.ALL)
+            cascade =  CascadeType.ALL,
+            orphanRemoval = true)
     private List<BillUser> userBill;
 
 
-    public Set<Declaration> getDeclaration() {
+    public List getDeclaration() {
         return declaration;
     }
 
-    public void setDeclaration(Set<Declaration> declaration) {
+    public void setDeclaration(List declaration) {
         this.declaration = declaration;
     }
 

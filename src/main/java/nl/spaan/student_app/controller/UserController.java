@@ -59,4 +59,10 @@ public class UserController {
     public ResponseEntity<?> getAllRoommates(@RequestHeader Map<String, String> headers){
         return userService.getAllRoommates(headers.get("authorization"));
     }
+
+    @DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> deleteUser(@PathVariable("username") String username){
+        return userService.deleteUser(username);
+    }
 }
