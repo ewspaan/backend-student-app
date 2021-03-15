@@ -1,13 +1,21 @@
 package nl.spaan.student_app.payload.request;
 
-import java.sql.Blob;
 
 public class DeclarationRequest {
 
+    private int day;
     private int month;
     private int year;
-    private double amount;
+    private String amount;
     private String fileName;
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setDay(int day) {
+        this.day = day;
+    }
 
     public int getMonth() {
         return month;
@@ -25,11 +33,11 @@ public class DeclarationRequest {
         this.year = year;
     }
 
-    public double getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 

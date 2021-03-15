@@ -33,8 +33,8 @@ public class DeclarationController {
     }
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
-    public ResponseEntity<?> uploadFile(@RequestHeader Map<String, String> headers,
-                                        @RequestBody DeclarationRequest declarationRequest) {
+    public ResponseEntity<?> uploadDeclaration(@RequestHeader Map<String, String> headers,
+                                               @RequestBody DeclarationRequest declarationRequest) {
         return declarationService.storeDeclaration(headers.get("authorization"),declarationRequest);
     }
 

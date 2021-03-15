@@ -160,12 +160,9 @@ public class AuthorizationService {
 
     public ResponseEntity<JwtResponse> authenticateUser(LoginRequest loginRequest) {
 
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                         loginRequest.getPassword()));
-
-        //System.out.println(authentication);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -174,8 +171,6 @@ public class AuthorizationService {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
-        System.out.println("Role-->  " + roles.get(0));
-        //Zet array om in een string
         String role = roles.get(0);
 
         return ResponseEntity.ok(new JwtResponse(jwt,

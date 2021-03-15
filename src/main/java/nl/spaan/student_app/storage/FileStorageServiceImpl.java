@@ -94,10 +94,26 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
 		}
 		FileDB fileDB = new FileDB();
+		System.out.println("path--> " + targetLocation.toString());
 		fileDB.setFilePath(targetLocation.toString());
 		fileDB.setNameFile(fileNameCustom);
 		fileDBRepository.save(fileDB);
 		return ResponseEntity.ok(fileNameCustom);
 	}
+	@Override
+	public ResponseEntity<?> store(String file, String token, Declaration declaration)  {
+
+
+		FileDB fileDB = new FileDB();
+
+		fileDB.setNameFile(file);
+		fileDB.setDeclaration(declaration);
+		fileDBRepository.save(fileDB);
+		return ResponseEntity.ok("File opgeslagen");
+	}
+
+
+
+
 
 }

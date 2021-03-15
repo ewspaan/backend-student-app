@@ -53,4 +53,16 @@ public class UserController {
                                             @RequestBody AddRequest addRequest) {
         return userService.addUserToHouse(headers.get("authorization"), addRequest);
     }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> getAllRoommates(@RequestHeader Map<String, String> headers){
+        return userService.getAllRoommates(headers.get("authorization"));
+    }
+
+    @DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> deleteUser(@PathVariable("username") String username){
+        return userService.deleteUser(username);
+    }
 }

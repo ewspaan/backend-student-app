@@ -12,7 +12,8 @@ import java.io.IOException;
 public interface DeclarationService {
 
 
-    ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest);
 
     ResponseEntity<?> getAllDeclarations(String authorization);
+
+    ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest);
 }

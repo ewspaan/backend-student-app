@@ -8,16 +8,13 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String dateOfBirth;
-    private String houseName;
     private String roles;
-
-    public UserResponse(long id, String username, String firstName, String email, String roles) {
-        this.id = id;
-        this.username = username;
-        this.firstName = firstName;
-        this.email = email;
-        this.roles = roles;
-    }
+    private String houseName;
+    private String accountNumber;
+    private double waterUtility;
+    private double gasUtility;
+    private double elektraUtility;
+    private double internetUtility;
 
     public long getId() {
         return id;
@@ -25,18 +22,6 @@ public class UserResponse {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public void setRoles(String roles) {
-        this.roles = roles;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
     }
 
     public String getUsername() {
@@ -47,16 +32,12 @@ public class UserResponse {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getRoles() {
-        return roles;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
@@ -67,12 +48,28 @@ public class UserResponse {
         this.lastName = lastName;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getDateOfBirth() {
         return dateOfBirth;
     }
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
     }
 
     public String getHouseName() {
@@ -83,4 +80,43 @@ public class UserResponse {
         this.houseName = houseName;
     }
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public double getWaterUtility() {
+        return waterUtility;
+    }
+
+    public void setWaterUtility(double waterUtility) {
+        this.waterUtility = waterUtility;
+    }
+
+    public double getGasUtility() {
+        return gasUtility;
+    }
+
+    public void setGasUtility(double gasUtility) {
+        this.gasUtility = gasUtility;
+    }
+
+    public double getElektraUtility() {
+        return elektraUtility;
+    }
+
+    public void setElektraUtility(double elektraUtility) {
+        this.elektraUtility = elektraUtility;
+    }
+
+    public double getInternetUtility() {
+        return internetUtility;
+    }
+
+    public void setInternetUtility(double internetUtility) {
+        this.internetUtility = internetUtility;
+    }
 }

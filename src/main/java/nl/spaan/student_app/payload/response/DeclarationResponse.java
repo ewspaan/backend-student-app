@@ -2,18 +2,29 @@ package nl.spaan.student_app.payload.response;
 
 public class DeclarationResponse {
 
+    private long id;
     private String firstName;
     private String lastName;
     private double amount;
     private String fileName;
 
-    public DeclarationResponse(String firstName, String lastName, double amount) {
+
+
+    public DeclarationResponse(long id, String firstName, String lastName, double amount, String fileName) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.amount = amount;
-
+        this.fileName = fileName;
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -46,4 +57,5 @@ public class DeclarationResponse {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+
 }

@@ -20,18 +20,16 @@ public class FileDB {
     )
     @Column(columnDefinition = "serial")
     private Long id;
+    @Column ( length= 10485760)
     private String nameFile;
     private String type;
     private String filePath;
 
-    public FileDB() {
-    }
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "declaration_id")
+    private Declaration declaration;
 
-    public FileDB(String name, String type, String filePath) {
-        this.nameFile = name;
-        this.type = type;
-        this.filePath = filePath;
-    }
 
 
     public Long getId() {
@@ -66,4 +64,11 @@ public class FileDB {
         this.filePath = filePath;
     }
 
+    public Declaration getDeclaration() {
+        return declaration;
+    }
+
+    public void setDeclaration(Declaration declaration) {
+        this.declaration = declaration;
+    }
 }

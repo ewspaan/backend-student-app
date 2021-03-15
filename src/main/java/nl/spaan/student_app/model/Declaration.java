@@ -27,16 +27,18 @@ public class Declaration {
     private boolean checked;
     private boolean correct;
 
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch=FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "house_id", nullable = false)
     private House house;
 
-    public Declaration() {
-    }
+    @OneToOne(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private FileDB fileDB;
+
 
     public long getId() {
         return id;
@@ -108,5 +110,13 @@ public class Declaration {
 
     public void setHouse(House house) {
         this.house = house;
+    }
+
+    public FileDB getFileDB() {
+        return fileDB;
+    }
+
+    public void setFileDB(FileDB fileDB) {
+        this.fileDB = fileDB;
     }
 }
