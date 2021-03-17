@@ -14,4 +14,5 @@ public interface DeclarationRepository extends JpaRepository<Declaration, Long> 
 
 
     List<Declaration> findAllByHouseId(long id);
+
 }

@@ -18,9 +18,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public ResponseEntity<?> updateAccount(String token , UpdateAccountRequest updateAccountRequest){
 
-        Long id = userService.findUserNameFromToken(token).getHouse().getId();
+        long id = userService.findUserNameFromToken(token).getHouse().getId();
         if (accountRepository.existsByHouseId(id)) {
-            Account account = accountRepository.findByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
+            Account account = accountRepository.findByHouseId(id);
 
             if (updateAccountRequest.getAccountNumber() != null && !updateAccountRequest.getAccountNumber().isEmpty()) {
                 account.setAccountNumber(updateAccountRequest.getAccountNumber());
@@ -71,11 +71,10 @@ public class AccountServiceImpl implements AccountService {
         return ResponseEntity.ok("Huisrekening bestaat nog niet");
     }
     private double addUtilities(Account account){
-        double totalAmount = account.getElektraUtility()+
+        return account.getElektraUtility()+
                             account.getGasUtility()+
                             account.getWaterUtility()+
                             account.getInternetUtility();
-        return totalAmount;
     }
 
     @Autowired

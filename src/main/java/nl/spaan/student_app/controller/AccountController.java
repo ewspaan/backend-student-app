@@ -22,7 +22,7 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     @PreAuthorize("hasRole('MODERATOR')")
     ResponseEntity<?> updateAccount(@RequestHeader Map<String, String> headers,
                                     @RequestBody UpdateAccountRequest updateAccountRequest){

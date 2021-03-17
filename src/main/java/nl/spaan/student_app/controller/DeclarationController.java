@@ -26,16 +26,23 @@ public class DeclarationController {
         this.declarationService = declarationService;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all/{checked}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<?> getDeclarations(@RequestHeader Map<String, String> headers) {
-        return declarationService.getAllDeclarations(headers.get("authorization"));
+    public ResponseEntity<?> getDeclarations(@RequestHeader Map<String, String> headers,
+                                             @PathVariable boolean checked) {
+        return declarationService.getAllDeclarations(headers.get("authorization"), checked);
     }
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     public ResponseEntity<?> uploadDeclaration(@RequestHeader Map<String, String> headers,
                                                @RequestBody DeclarationRequest declarationRequest) {
         return declarationService.storeDeclaration(headers.get("authorization"),declarationRequest);
+    }
+    @PutMapping("/update")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> updateDeclaration(@RequestHeader Map<String, String> headers,
+                                               @RequestBody DeclarationRequest declarationRequest){
+        return declarationService.updateDeclaration(headers.get("authorization"),declarationRequest);
     }
 
 }

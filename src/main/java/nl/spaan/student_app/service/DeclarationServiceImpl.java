@@ -8,14 +8,11 @@ import nl.spaan.student_app.repository.DeclarationRepository;
 import nl.spaan.student_app.repository.FileDBRepository;
 import nl.spaan.student_app.repository.UserRepository;
 import nl.spaan.student_app.storage.FileStorageService;
-import nl.spaan.student_app.storage.StorageException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -139,15 +136,23 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public ResponseEntity<?> getAllDeclarations(String token) {
+    public ResponseEntity<?> getAllDeclarations(String token, boolean checked) {
+
+
 
         List<Declaration> declarations = declarationRepository.findAllByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
         List<Declaration> declarationsToCheck = new ArrayList<Declaration>();
         List<DeclarationResponse> declarationResponses= new ArrayList<>();
-        if (!declarations.isEmpty()) {
-            for (int i = 0; i < declarations.size(); i++) {
-                if (!declarations.get(i).isChecked()) {
-                    declarationsToCheck.add(declarations.get(i));
+        if (!declarations.isEmpty() && checked) {
+            for (Declaration declaration : declarations) {
+                if (!declaration.isChecked()) {
+                    declarationsToCheck.add(declaration);
+                }
+            }
+        }else {
+            for (Declaration declaration : declarations) {
+                if (declaration.isChecked()) {
+                    declarationsToCheck.add(declaration);
                 }
             }
         }
@@ -167,5 +172,31 @@ public class DeclarationServiceImpl implements DeclarationService {
             }
         }
         return ResponseEntity.ok(declarationResponses);
+    }
+
+    @Override
+    public ResponseEntity<?> updateDeclaration(String token, DeclarationRequest declarationRequest){
+
+        System.out.println("bla decla--> " + declarationRequest.getId());
+        Declaration declaration;
+        if(declarationExist(declarationRequest.getId())) {
+            declaration = declarationRepository.getOne(declarationRequest.getId());
+        }else {
+            return ResponseEntity.ok("declaratie bestaat niet");
+        }
+        if(!declarationRequest.getCorrect()){
+            declaration.setChecked(true);
+            declaration.setCorrect(false);
+            declarationRepository.save(declaration);
+        }else {
+            declaration.setChecked(true);
+            declaration.setCorrect(true);
+            declarationRepository.save(declaration);
+        }
+        return ResponseEntity.ok("declaratie verandert");
+    }
+
+    private boolean declarationExist(long id){
+        return declarationRepository.existsById(id);
     }
 }
