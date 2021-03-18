@@ -7,15 +7,7 @@ import javax.persistence.*;
 @MappedSuperclass
 public class Bill {
     @Id
-    @GeneratedValue(
-            strategy= GenerationType.AUTO,
-            generator="native"
-    )
-    @GenericGenerator(
-            name = "native",
-            strategy = "native"
-    )
-    @Column(columnDefinition = "serial")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private int month;
     private int year;
