@@ -255,6 +255,7 @@ public class UserServiceImpl implements UserService {
             userResponse.setEmail(user.getEmail());
             userResponse.setDateOfBirth(user.getDateOfBirth());
             userResponse.setRoles(role);
+            userResponse.setHouseId(user.getHouse().getId());
             userResponse.setHouseName(user.getHouse().getHouseName());
             userResponse.setAccountNumber(user.getHouse().getAccount().getAccountNumber());
             userResponse.setWaterUtility(user.getHouse().getAccount().getWaterUtility());

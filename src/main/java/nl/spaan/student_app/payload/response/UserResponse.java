@@ -9,6 +9,7 @@ public class UserResponse {
     private String email;
     private String dateOfBirth;
     private String roles;
+    private long houseId;
     private String houseName;
     private String accountNumber;
     private double waterUtility;
@@ -70,6 +71,14 @@ public class UserResponse {
 
     public void setRoles(String roles) {
         this.roles = roles;
+    }
+
+    public long getHouseId() {
+        return houseId;
+    }
+
+    public void setHouseId(long houseId) {
+        this.houseId = houseId;
     }
 
     public String getHouseName() {

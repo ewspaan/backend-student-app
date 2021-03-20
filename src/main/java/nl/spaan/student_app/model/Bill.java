@@ -1,18 +1,31 @@
 package nl.spaan.student_app.model;
 
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.List;
 
-@MappedSuperclass
+@Entity
+@Table(name = "bills")
 public class Bill {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private int month;
     private int year;
+    private double totalUtilities;
+    private double totalDeclarations;
     private double totalAmount;
     private boolean payed;
+
+    @ManyToOne
+    @JoinColumn(name = "house_id", nullable = false)
+    private House house;
+
+    @OneToMany(
+            mappedBy = "bill",
+            fetch = FetchType.LAZY)
+    private List<BillUser> userBills;
 
     public long getId() {
         return id;
@@ -38,6 +51,22 @@ public class Bill {
         this.year = year;
     }
 
+    public double getTotalUtilities() {
+        return totalUtilities;
+    }
+
+    public void setTotalUtilities(double totalUtilities) {
+        this.totalUtilities = totalUtilities;
+    }
+
+    public double getTotalDeclarations() {
+        return totalDeclarations;
+    }
+
+    public void setTotalDeclarations(double totalDeclarations) {
+        this.totalDeclarations = totalDeclarations;
+    }
+
     public double getTotalAmount() {
         return totalAmount;
     }
@@ -52,5 +81,21 @@ public class Bill {
 
     public void setPayed(boolean payed) {
         this.payed = payed;
+    }
+
+    public House getHouse() {
+        return house;
+    }
+
+    public void setHouse(House house) {
+        this.house = house;
+    }
+
+    public List<BillUser> getUserBills() {
+        return userBills;
+    }
+
+    public void setUserBills(List<BillUser> userBills) {
+        this.userBills = userBills;
     }
 }

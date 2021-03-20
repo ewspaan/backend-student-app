@@ -28,6 +28,8 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     private BillRepository billRepository;
 
+    private BillService billService;
+
     private UserService userService;
 
     private FileStorageService fileStorageService;
@@ -63,60 +65,23 @@ public class DeclarationServiceImpl implements DeclarationService {
         this.fileStorageService = fileStorageService;
     }
 
+    @Autowired
+    public void setBillService(BillService billService) {
+        this.billService = billService;
+    }
+
     @Override
     public ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest) {
 
-        /*Bij het binnenkomen van een declaratie wordt eerst gekeken of er voor die maand al een huisrekening is gemaakt.
-          Is die er niet dan wordt die aangemaakt. Dan wordt er gekeken of de user al een huisrekening voor die maand heeft.
-          Is die er niet wordt die aangemaakt.
-          Declaratie wordt toegevoegd aan huisrekening algemeen en huisrekening user.
-        */
-        System.out.println("bla " + declarationRequest.getFileName() + "  " + declarationRequest.getAmount());
+
         LocalDate date = LocalDate.now();
         int month = date.getMonthValue();
         int year = date.getYear();
         //Todo check voor juiste string
         double amountDouble = Double.parseDouble(declarationRequest.getAmount());
 
-
         User user = userService.findUserNameFromToken(token);
-        BillHouse billHouse = new BillHouse();
-        BillUser billUser = new BillUser();
         Declaration declaration = new Declaration();
-        List<BillHouse> houseBills = user.getHouse().getBillHouse();
-        List<BillUser> userBills = user.getUserBill();
-
-        for(int i = 0; i < houseBills.size(); i++){
-            if(houseBills.get(i).getMonth() == month && houseBills.get(i).getYear() == year){
-                billHouse = houseBills.get(i);
-            }
-        }
-        System.out.println("bla " + billHouse.getYear());
-        if (billHouse.getYear() == 0)
-        {
-            billHouse.setHouse(user.getHouse());
-            billHouse.setMonth(month);
-            billHouse.setYear(year);
-            billHouse.setTotalUtilities(user.getHouse().getAccount().getTotalAmountUtilities());
-
-        }
-        System.out.println("bla decla");
-        for(int i = 0; i < userBills.size(); i++){
-            if(userBills.get(i).getMonth() == month && userBills.get(i).getYear() == year ){
-                billUser = userBills.get(i);
-            }
-        }
-
-        if (billUser.getYear() == 0){
-            billUser.setUser(user);
-            billUser.setMonth(month);
-            billUser.setYear(year);
-            billUser.setTotalAmount(billHouse.getTotalAmount());
-
-        }
-        //verhoog het totaal van de gedeclareerde boodschappen
-        billHouse.setTotalDeclarations(billHouse.getTotalDeclarations() + amountDouble);
-        billUser.setTotalDeclarations(billUser.getTotalDeclarations() + amountDouble);
 
         declaration.setHouse(user.getHouse());
         declaration.setUser(user);
@@ -126,9 +91,6 @@ public class DeclarationServiceImpl implements DeclarationService {
         declaration.setCorrect(false);
         declaration.setChecked(false);
         fileStorageService.store(declarationRequest.getFileName(),token,declaration);
-
-        billRepository.save(billUser);
-        billRepository.save(billHouse);
         declarationRepository.save(declaration);
 
         return ResponseEntity.ok(declaration.getId());

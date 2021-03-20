@@ -21,12 +21,18 @@ public class BillController {
         this.billService = billService;
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("hasRole('MODERATOR')")
-    ResponseEntity<?> createBill(@RequestHeader Map<String, String> headers,
-                                 @RequestBody BillRequest billRequest){
+//    @PostMapping("/create")
+//    @PreAuthorize("hasRole('MODERATOR')")
+//    ResponseEntity<?> createBill(@RequestHeader Map<String, String> headers,
+//                                 @RequestBody BillRequest billRequest){
+//
+//        return billService.createBill(headers.get("authorization"), billRequest);
+//    }
 
-        return billService.createBill(headers.get("authorization"), billRequest);
+    @GetMapping("/{houseId}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    ResponseEntity<?> getHouseBill(@PathVariable("houseId") long houseId){
+        return billService.getHouseBill(houseId);
     }
 
 }

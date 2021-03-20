@@ -24,6 +24,6 @@ INSERT INTO user_role (role_id, user_id) VALUES ((SELECT id FROM role WHERE name
 INSERT INTO user_role (role_id, user_id) VALUES ((SELECT id FROM role WHERE name  = 'ROLE_USER'),(SELECT id FROM app_users where username = 'macblaat2'));
 
 INSERT INTO accounts (house_id , account_number, elektra_utility, gas_utility, internet_utility,
-                      water_utility, total_amount_utilities)  VALUES ((SELECT house_id FROM app_users where username = 'macbla') , '12345678' , 12.50 , 12.80, 13.40 , 14.90, 0);
+                      water_utility, total_amount_utilities)  VALUES ((SELECT house_id FROM app_users where username = 'macbla') , '12345678' , 12.50 , 12.80, 17.20 , 17.50, 60);
 
 

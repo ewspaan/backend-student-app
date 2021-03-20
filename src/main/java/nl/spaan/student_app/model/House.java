@@ -33,7 +33,7 @@ public class House {
     @OneToMany(
             mappedBy = "house",
             fetch = FetchType.LAZY)
-    private List<BillHouse> billHouse;
+    private List<Bill> billHouse;
 
     public long getId() {
         return id;
@@ -75,11 +75,11 @@ public class House {
         this.account = account;
     }
 
-    public List<BillHouse> getBillHouse() {
+    public List<Bill> getBillHouse() {
         return billHouse;
     }
 
-    public void setBillHouse(List<BillHouse> billHouse) {
+    public void setBillHouse(List<Bill> billHouse) {
         this.billHouse = billHouse;
     }
 }
