@@ -90,6 +90,7 @@ public class DeclarationServiceImpl implements DeclarationService {
         declaration.setGroceriesAmount(amountDouble);
         declaration.setCorrect(false);
         declaration.setChecked(false);
+        billService.updateBill(declaration);
         fileStorageService.store(declarationRequest.getFileName(),token,declaration);
         declarationRepository.save(declaration);
 
@@ -99,8 +100,6 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     @Override
     public ResponseEntity<?> getAllDeclarations(String token, boolean checked) {
-
-
 
         List<Declaration> declarations = declarationRepository.findAllByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
         List<Declaration> declarationsToCheck = new ArrayList<Declaration>();

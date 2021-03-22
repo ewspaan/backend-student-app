@@ -1,5 +1,7 @@
 package nl.spaan.student_app.payload.response;
 
+import java.util.List;
+
 public class BillResponse {
 
     private double totalAmountMonth;
@@ -7,10 +9,9 @@ public class BillResponse {
     private double totalAmountUtilities;
     private int month;
     private int year;
-    private String firstName;
-    private String lastName;
-    private double declarationsUser;
-    private double toPayMonth;
+    private boolean payed;
+    private List<BillResponseUser> billResponseUsers;
+
 
     public double getTotalAmountMonth() {
         return totalAmountMonth;
@@ -52,35 +53,19 @@ public class BillResponse {
         this.year = year;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public boolean isPayed() {
+        return payed;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setPayed(boolean payed) {
+        this.payed = payed;
     }
 
-    public String getLastName() {
-        return lastName;
+    public List<BillResponseUser> getBillResponseUsers() {
+        return billResponseUsers;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public double getDeclarationsUser() {
-        return declarationsUser;
-    }
-
-    public void setDeclarationsUser(double declarationsUser) {
-        this.declarationsUser = declarationsUser;
-    }
-
-    public double getToPayMonth() {
-        return toPayMonth;
-    }
-
-    public void setToPayMonth(double toPayMonth) {
-        this.toPayMonth = toPayMonth;
+    public void setBillResponseUsers(List<BillResponseUser> billResponseUsers) {
+        this.billResponseUsers = billResponseUsers;
     }
 }

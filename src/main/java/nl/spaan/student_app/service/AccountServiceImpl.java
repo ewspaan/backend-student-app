@@ -8,10 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
     private UserService userService;
+
+    private BillService billService;
 
     private AccountRepository accountRepository;
 
@@ -39,6 +43,10 @@ public class AccountServiceImpl implements AccountService {
             }
             account.setTotalAmountUtilities(addUtilities(account));
             accountRepository.save(account);
+            LocalDate date = LocalDate.now();
+            int month = date.getMonthValue();
+            int year = date.getYear();
+            billService.updateBillHouse(id,month,year);
             return ResponseEntity.ok("Account succesvol geüpdatet");
         }
         Account newAccount = new Account(updateAccountRequest.getAccountNumber(),
@@ -85,5 +93,10 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public void setAccountRepository(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
+    }
+
+    @Autowired
+    public void setBillService(BillService billService) {
+        this.billService = billService;
     }
 }

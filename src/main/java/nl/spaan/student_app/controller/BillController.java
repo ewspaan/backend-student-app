@@ -21,18 +21,24 @@ public class BillController {
         this.billService = billService;
     }
 
-//    @PostMapping("/create")
-//    @PreAuthorize("hasRole('MODERATOR')")
-//    ResponseEntity<?> createBill(@RequestHeader Map<String, String> headers,
-//                                 @RequestBody BillRequest billRequest){
-//
-//        return billService.createBill(headers.get("authorization"), billRequest);
-//    }
 
-    @GetMapping("/{houseId}")
+    @PutMapping("/payed/{billId}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    ResponseEntity<?> togglePayedBill(@PathVariable("billId") long billId){
+        return billService.togglePayed(billId);
+    }
+
+    @GetMapping("/house/{houseId}")
     @PreAuthorize("hasRole('MODERATOR')")
     ResponseEntity<?> getHouseBill(@PathVariable("houseId") long houseId){
         return billService.getHouseBill(houseId);
+    }
+
+    @GetMapping("/personal/{payed}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    ResponseEntity<?> getHouseBillUser(@RequestHeader Map<String, String> headers,
+                                       @PathVariable("payed") boolean payed){
+        return billService.getHouseBillUser(headers.get("authorization"), payed);
     }
 
 }

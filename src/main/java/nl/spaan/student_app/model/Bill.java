@@ -25,7 +25,7 @@ public class Bill {
     @OneToMany(
             mappedBy = "bill",
             fetch = FetchType.LAZY)
-    private List<BillUser> userBills;
+    private List<BillUser> BillsUser;
 
     public long getId() {
         return id;
@@ -91,11 +91,11 @@ public class Bill {
         this.house = house;
     }
 
-    public List<BillUser> getUserBills() {
-        return userBills;
+    public List<BillUser> getBillsUser() {
+        return BillsUser;
     }
 
-    public void setUserBills(List<BillUser> userBills) {
-        this.userBills = userBills;
+    public void setBillsUser(List<BillUser> userBills) {
+        this.BillsUser = userBills;
     }
 }

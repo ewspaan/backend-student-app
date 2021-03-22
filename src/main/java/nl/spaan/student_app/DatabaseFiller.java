@@ -1,6 +1,5 @@
 package nl.spaan.student_app;
 
-import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.service.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Component;
 public class DatabaseFiller implements CommandLineRunner {
 
     private final AuthorizationService authorizationService;
+
+
 
     @Autowired
     public DatabaseFiller(AuthorizationService authorizationService) {
@@ -37,6 +38,7 @@ public class DatabaseFiller implements CommandLineRunner {
         ralph.setDateOfBirth("03-04-2001");
         ralph.setPassword("password");
         authorizationService.registerUser(ralph);
+
 
     }
 }

@@ -24,6 +24,7 @@ public class BillUser{
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
+
     public long getId() {
         return id;
     }

@@ -29,7 +29,7 @@ public class DeclarationController {
     @GetMapping("/all/{checked}")
     @PreAuthorize("hasRole('MODERATOR')")
     public ResponseEntity<?> getDeclarations(@RequestHeader Map<String, String> headers,
-                                             @PathVariable boolean checked) {
+                                             @PathVariable("checked") boolean checked) {
         return declarationService.getAllDeclarations(headers.get("authorization"), checked);
     }
     @PostMapping("/upload")
