@@ -102,8 +102,7 @@ public class DeclarationServiceImpl implements DeclarationService {
     public ResponseEntity<?> getAllDeclarations(String token, boolean checked) {
 
         List<Declaration> declarations = declarationRepository.findAllByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
-        List<Declaration> declarationsToCheck = new ArrayList<Declaration>();
-        List<DeclarationResponse> declarationResponses= new ArrayList<>();
+        List<Declaration> declarationsToCheck = new ArrayList<>();
         if (!declarations.isEmpty() && checked) {
             for (Declaration declaration : declarations) {
                 if (!declaration.isChecked()) {
@@ -117,22 +116,42 @@ public class DeclarationServiceImpl implements DeclarationService {
                 }
             }
         }
-        User user;
-        FileDB fileDB;
-        if(!declarationsToCheck.isEmpty()) {
-            for (Declaration declaration : declarationsToCheck) {
-                user = userRepository.findUserById(declaration.getUser().getId());
-                fileDB = fileDBRepository.findFileById(declaration.getId());
-                DeclarationResponse declarationResponse = new DeclarationResponse(
-                        declaration.getId(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        declaration.getGroceriesAmount(),
-                        fileDB.getNameFile());
-                declarationResponses.add(declarationResponse);
-            }
-        }
-        return ResponseEntity.ok(declarationResponses);
+
+        return ResponseEntity.ok(createDeclarationResponse(declarationsToCheck));
+    }
+
+    @Override
+    public ResponseEntity<?> getDeclarationsUser(String token, boolean checked){
+
+        List<Declaration> declarations = declarationRepository.findAllByUserIdAndCorrect(userService.findUserNameFromToken(token).getId(), checked);
+
+        return ResponseEntity.ok(createDeclarationResponse(declarations));
+    }
+
+    @Override
+    public ResponseEntity<?> getDeclaration(String authorization, long id){
+        Declaration declaration = declarationRepository.getOne(id);
+        DeclarationResponse declarationResponse = new DeclarationResponse(id,
+                declaration.getUser().getFirstName()
+                ,declaration.getUser().getLastName()
+                ,declaration.getGroceriesAmount()
+                ,declaration.getFileDB().getNameFile());
+
+        return ResponseEntity.ok(declarationResponse);
+    }
+
+    @Override
+    public ResponseEntity<?> editDeclaration(String token, DeclarationRequest declarationRequest) {
+
+        Declaration declaration = declarationRepository.getOne(declarationRequest.getId());
+        double amountDouble = Double.parseDouble(declarationRequest.getAmount());
+        declaration.setChecked(false);
+        declaration.setGroceriesAmount(amountDouble);
+        declarationRepository.save(declaration);
+        FileDB fileDB = fileDBRepository.getOne(declaration.getId());
+        fileDB.setNameFile(declarationRequest.getFileName());
+        fileDBRepository.save(fileDB);
+        return null;
     }
 
     @Override
@@ -159,5 +178,26 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     private boolean declarationExist(long id){
         return declarationRepository.existsById(id);
+    }
+
+    private List<DeclarationResponse> createDeclarationResponse(List<Declaration> declarations){
+
+        List<DeclarationResponse> declarationResponses= new ArrayList<>();
+        User user;
+        FileDB fileDB;
+        if(!declarations.isEmpty()) {
+            for (Declaration declaration : declarations) {
+                user = userRepository.findUserById(declaration.getUser().getId());
+                fileDB = fileDBRepository.findFileById(declaration.getId());
+                DeclarationResponse declarationResponse = new DeclarationResponse(
+                        declaration.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        declaration.getGroceriesAmount(),
+                        fileDB.getNameFile());
+                declarationResponses.add(declarationResponse);
+            }
+        }
+        return (declarationResponses);
     }
 }

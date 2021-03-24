@@ -32,6 +32,21 @@ public class DeclarationController {
                                              @PathVariable("checked") boolean checked) {
         return declarationService.getAllDeclarations(headers.get("authorization"), checked);
     }
+
+    @GetMapping("/personal/{checked}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> getDeclarationsUser(@RequestHeader Map<String, String> headers,
+                                             @PathVariable("checked") boolean checked) {
+        return declarationService.getDeclarationsUser(headers.get("authorization"), checked);
+    }
+
+    @GetMapping("/personal/edit/{id}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> getDeclaration(@RequestHeader Map<String, String> headers,
+                                                 @PathVariable("id") long id) {
+        return declarationService.getDeclaration(headers.get("authorization"), id);
+    }
+
     @PostMapping("/upload")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
     public ResponseEntity<?> uploadDeclaration(@RequestHeader Map<String, String> headers,
@@ -44,5 +59,14 @@ public class DeclarationController {
                                                @RequestBody DeclarationRequest declarationRequest){
         return declarationService.updateDeclaration(headers.get("authorization"),declarationRequest);
     }
+
+    @PutMapping("/edit")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('USER')")
+    public ResponseEntity<?> editDeclaration(@RequestHeader Map<String, String> headers,
+                                             @RequestBody DeclarationRequest declarationRequest){
+            return declarationService.editDeclaration(headers.get("authorization"),declarationRequest);
+    }
+
+
 
 }

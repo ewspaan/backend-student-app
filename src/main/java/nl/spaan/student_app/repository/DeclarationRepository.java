@@ -19,4 +19,6 @@ public interface DeclarationRepository extends JpaRepository<Declaration, Long> 
     Collection<? extends Declaration> findAllByUserIdAndMonthAndYear(long id, int month, int year);
 
     Collection<? extends Declaration> findAllByHouseIdAndMonthAndYear(long houseId, int month, int year);
+
+    List<Declaration> findAllByUserIdAndCorrect(long id, boolean checked);
 }
