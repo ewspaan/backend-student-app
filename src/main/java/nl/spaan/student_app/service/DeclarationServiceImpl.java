@@ -90,7 +90,7 @@ public class DeclarationServiceImpl implements DeclarationService {
         declaration.setGroceriesAmount(amountDouble);
         declaration.setCorrect(false);
         declaration.setChecked(false);
-        billService.updateBill(declaration);
+        billService.updateBillWithDeclaration(declaration);
         fileStorageService.store(declarationRequest.getFileName(),token,declaration);
         declarationRepository.save(declaration);
 
@@ -111,7 +111,7 @@ public class DeclarationServiceImpl implements DeclarationService {
             }
         }else {
             for (Declaration declaration : declarations) {
-                if (declaration.isChecked()) {
+                if (declaration.isCorrect()) {
                     declarationsToCheck.add(declaration);
                 }
             }
@@ -121,9 +121,9 @@ public class DeclarationServiceImpl implements DeclarationService {
     }
 
     @Override
-    public ResponseEntity<?> getDeclarationsUser(String token, boolean checked){
+    public ResponseEntity<?> getDeclarationsUser(String token, boolean correct){
 
-        List<Declaration> declarations = declarationRepository.findAllByUserIdAndCorrect(userService.findUserNameFromToken(token).getId(), checked);
+        List<Declaration> declarations = declarationRepository.findAllByUserIdAndAndCheckedAndCorrect(userService.findUserNameFromToken(token).getId(), true, correct);
 
         return ResponseEntity.ok(createDeclarationResponse(declarations));
     }

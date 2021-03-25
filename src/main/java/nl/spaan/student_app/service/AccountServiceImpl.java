@@ -46,7 +46,7 @@ public class AccountServiceImpl implements AccountService {
             LocalDate date = LocalDate.now();
             int month = date.getMonthValue();
             int year = date.getYear();
-            billService.updateBillHouse(id,month,year);
+            billService.updateBillWhenAccountChange(id,month,year);
             return ResponseEntity.ok("Account succesvol geüpdatet");
         }
         Account newAccount = new Account(updateAccountRequest.getAccountNumber(),

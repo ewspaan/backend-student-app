@@ -81,7 +81,7 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public void updateBill(Declaration declaration){
+    public void updateBillWithDeclaration(Declaration declaration){
 
         int month = declaration.getMonth();
         int year = declaration.getYear();
@@ -90,24 +90,49 @@ public class BillServiceImpl implements BillService {
             createBill(id,month,year);
         }
         Bill bill = billRepository.findByHouseIdAndMonthAndYear(id, month, year);
+        if(bill.isPayed()){
+            return;
+        }
         bill.setTotalDeclarations(bill.getTotalDeclarations()+declaration.getGroceriesAmount());
 
-        BillUser billUser = billUserRepository.findByUserIdAndBillId(declaration.getUser().getId(), bill.getId());
-        billUser.setTotalDeclarations(billUser.getTotalDeclarations()+declaration.getGroceriesAmount());
+        List<User> roommates = new ArrayList<>(bill.getHouse().getUserList());
+        for (User user : roommates) {
+            BillUser billUser = billUserRepository.findByUserIdAndBillId(user.getId(), bill.getId());
+            if(user == declaration.getUser()) {
+                billUser.setTotalDeclarations(billUser.getTotalDeclarations() + declaration.getGroceriesAmount());
+            }
+            billUser.setAmountToPay(((
+                        bill.getTotalDeclarations() + bill.getTotalUtilities())
+                        / bill.getHouse().getUserList().size())
+                        - billUser.getTotalDeclarations());
+            billUserRepository.save(billUser);
+        }
 
         billRepository.save(bill);
-        billUserRepository.save(billUser);
+
 
     }
 
     @Override
-    public void updateBillHouse(long id, int month, int year){
+    public void updateBillWhenAccountChange(long id, int month, int year){
 
         if (!checkIfBillMonthExist(id, month, year)){
             createBill(id,month,year);
         }
         Bill bill = billRepository.findByHouseIdAndMonthAndYear(id,month,year);
+        if(bill.isPayed()){
+            return;
+        }
         bill.setTotalUtilities(accountRepository.findByHouseId(id).getTotalAmountUtilities());
+        List<User> roommates = new ArrayList<>(bill.getHouse().getUserList());
+        for (User user : roommates) {
+            BillUser billUser = billUserRepository.findByUserIdAndBillId(user.getId(), bill.getId());
+            billUser.setAmountToPay(((
+                    bill.getTotalDeclarations() + bill.getTotalUtilities())
+                    / bill.getHouse().getUserList().size())
+                    - billUser.getTotalDeclarations());
+            billUserRepository.save(billUser);
+        }
         billRepository.save(bill);
     }
 
@@ -145,6 +170,7 @@ public class BillServiceImpl implements BillService {
                     billResponseUser.setId(billUser.getId());
                     billResponseUser.setFirstName(billUser.getUser().getFirstName());
                     billResponseUser.setLastName(billUser.getUser().getLastName());
+                    billResponseUser.setDeclarationsUser(billUser.getTotalDeclarations());
                     billResponseUser.setToPayMonth(billUser.getAmountToPay());
                     billResponseUsers.add(billResponseUser);
                 }
@@ -190,6 +216,7 @@ public class BillServiceImpl implements BillService {
                 billResponseUser.setYear(billUser.getBill().getYear());
                 billResponseUser.setToPayMonth(billUser.getAmountToPay());
                 billResponseUser.setPayed(billUser.isPayed());
+                billResponseUser.setDeclarationsUser(billUser.getTotalDeclarations());
                 bills.add(billResponseUser);
             }
         }
@@ -202,8 +229,9 @@ public class BillServiceImpl implements BillService {
         Bill bill = billRepository.getOne(billId);
         List<BillUser> billUsers = billUserRepository.findAllByBillId(billId);
         for (BillUser billUser : billUsers){
-            if(!billUser.isPayed()){
-                check =false;
+            if (!billUser.isPayed()) {
+                check = false;
+                break;
             }
         }
         if(check){

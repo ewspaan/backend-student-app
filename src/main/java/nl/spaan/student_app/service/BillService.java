@@ -13,9 +13,9 @@ public interface BillService {
 
     void createBill(long houseId, int month, int year);
 
-    void updateBill(Declaration declaration);
+    void updateBillWithDeclaration(Declaration declaration);
 
-    void updateBillHouse(long houseId, int month, int year);
+    void updateBillWhenAccountChange(long houseId, int month, int year);
 
     ResponseEntity<?> getHouseBill(long houseId);
 
