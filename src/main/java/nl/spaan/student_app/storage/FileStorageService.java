@@ -13,9 +13,5 @@ import java.io.IOException;
 @Service
 public interface FileStorageService {
 
-    void init();
-
-    ResponseEntity<?> store(MultipartFile file, String token);
-
     ResponseEntity<?> store(String file, String token, Declaration declaration);
 }
