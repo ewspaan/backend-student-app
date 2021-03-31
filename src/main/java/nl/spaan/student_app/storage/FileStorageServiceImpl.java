@@ -18,8 +18,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 	public void setFileDBRepository(FileDBRepository fileDBRepository) {
 		this.fileDBRepository = fileDBRepository;
 	}
-
-
 	@Override
 	public ResponseEntity<?> store(String file, String token, Declaration declaration)  {
 
