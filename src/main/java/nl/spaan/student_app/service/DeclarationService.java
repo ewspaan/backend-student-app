@@ -14,11 +14,13 @@ public interface DeclarationService {
 
     ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest);
 
-    ResponseEntity<?> updateDeclaration(String token, DeclarationRequest declarationRequest);
+    ResponseEntity<?> checkDeclaration(String token, DeclarationRequest declarationRequest);
 
     ResponseEntity<?> getDeclarationsUser(String authorization, boolean checked);
 
     ResponseEntity<?> getDeclaration(String authorization, long id);
 
     ResponseEntity<?> editDeclaration(String authorization, DeclarationRequest declarationRequest);
+
+    ResponseEntity<?> deleteDeclaration(long id);
 }

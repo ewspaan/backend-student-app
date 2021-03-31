@@ -13,7 +13,7 @@ public interface BillService {
 
     void createBill(long houseId, int month, int year);
 
-    void updateBillWithDeclaration(Declaration declaration);
+    void updateBillWhenDeclarationsChange(long id, int month, int year);
 
     void updateBillWhenAccountChange(long houseId, int month, int year);
 
@@ -24,4 +24,6 @@ public interface BillService {
     ResponseEntity<?> togglePayed(long billId);
 
     ResponseEntity<?> getHouseBillUser(String token, boolean payed);
+
+    ResponseEntity<?> createBillByRandomYear(long houseId);
 }

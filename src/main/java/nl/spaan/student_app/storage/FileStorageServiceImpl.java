@@ -18,21 +18,14 @@ public class FileStorageServiceImpl implements FileStorageService {
 	public void setFileDBRepository(FileDBRepository fileDBRepository) {
 		this.fileDBRepository = fileDBRepository;
 	}
-
 	@Override
 	public ResponseEntity<?> store(String file, String token, Declaration declaration)  {
 
-
+		//file wordt in de database opgeslagen als een String
 		FileDB fileDB = new FileDB();
-
 		fileDB.setNameFile(file);
 		fileDB.setDeclaration(declaration);
 		fileDBRepository.save(fileDB);
 		return ResponseEntity.ok("File opgeslagen");
 	}
-
-
-
-
-
 }

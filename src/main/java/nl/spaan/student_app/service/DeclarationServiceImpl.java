@@ -3,6 +3,7 @@ package nl.spaan.student_app.service;
 import nl.spaan.student_app.model.*;
 import nl.spaan.student_app.payload.request.DeclarationRequest;
 import nl.spaan.student_app.payload.response.DeclarationResponse;
+import nl.spaan.student_app.payload.response.MessageResponse;
 import nl.spaan.student_app.repository.BillRepository;
 import nl.spaan.student_app.repository.DeclarationRepository;
 import nl.spaan.student_app.repository.FileDBRepository;
@@ -26,13 +27,13 @@ public class DeclarationServiceImpl implements DeclarationService {
 
     private FileDBRepository fileDBRepository;
 
-    private BillRepository billRepository;
-
     private BillService billService;
 
     private UserService userService;
 
     private FileStorageService fileStorageService;
+
+    private BillRepository billRepository;
 
 
     @Autowired
@@ -50,10 +51,6 @@ public class DeclarationServiceImpl implements DeclarationService {
         this.fileDBRepository = fileDBRepository;
     }
 
-    @Autowired
-    public void setBillRepository(BillRepository billRepository) {
-        this.billRepository = billRepository;
-    }
 
     @Autowired
     public void setUserService(UserService userService) {
@@ -70,6 +67,11 @@ public class DeclarationServiceImpl implements DeclarationService {
         this.billService = billService;
     }
 
+    @Autowired
+    public void setBillRepository(BillRepository billRepository) {
+        this.billRepository = billRepository;
+    }
+
     @Override
     public ResponseEntity<?> storeDeclaration(String token, DeclarationRequest declarationRequest) {
 
@@ -81,8 +83,10 @@ public class DeclarationServiceImpl implements DeclarationService {
         double amountDouble = Double.parseDouble(declarationRequest.getAmount());
 
         User user = userService.findUserNameFromToken(token);
+        if (user.getUserBill().isEmpty()) {
+            return ResponseEntity.ok(new MessageResponse("Je bent nieuw. Je kunt vanaf volgende maand declaraties invoeren"));
+        }
         Declaration declaration = new Declaration();
-
         declaration.setHouse(user.getHouse());
         declaration.setUser(user);
         declaration.setMonth(month);
@@ -90,25 +94,25 @@ public class DeclarationServiceImpl implements DeclarationService {
         declaration.setGroceriesAmount(amountDouble);
         declaration.setCorrect(false);
         declaration.setChecked(false);
-        billService.updateBillWithDeclaration(declaration);
         fileStorageService.store(declarationRequest.getFileName(),token,declaration);
         declarationRepository.save(declaration);
+        billService.updateBillWhenDeclarationsChange(declaration.getHouse().getId(), month, year);
 
-        return ResponseEntity.ok(declaration.getId());
+        return ResponseEntity.ok(new MessageResponse("Declaratie succesvol opgeslagen"));
 
     }
 
     @Override
-    public ResponseEntity<?> getAllDeclarations(String token, boolean checked) {
+    public ResponseEntity<?> getAllDeclarations(String token, boolean correct) {
 
         List<Declaration> declarations = declarationRepository.findAllByHouseId(userService.findUserNameFromToken(token).getHouse().getId());
         List<Declaration> declarationsToCheck = new ArrayList<>();
-        if (!declarations.isEmpty() && checked) {
+        // originele declaratie en verkeerde declaraties
+        if (!declarations.isEmpty() && !correct) {
             for (Declaration declaration : declarations) {
-                if (!declaration.isChecked()) {
                     declarationsToCheck.add(declaration);
-                }
             }
+        // correcte declaraties
         }else {
             for (Declaration declaration : declarations) {
                 if (declaration.isCorrect()) {
@@ -116,7 +120,6 @@ public class DeclarationServiceImpl implements DeclarationService {
                 }
             }
         }
-
         return ResponseEntity.ok(createDeclarationResponse(declarationsToCheck));
     }
 
@@ -151,18 +154,18 @@ public class DeclarationServiceImpl implements DeclarationService {
         FileDB fileDB = fileDBRepository.getOne(declaration.getId());
         fileDB.setNameFile(declarationRequest.getFileName());
         fileDBRepository.save(fileDB);
-        return null;
+        billService.updateBillWhenDeclarationsChange(declaration.getHouse().getId(), declaration.getMonth(), declaration.getYear());
+        return ResponseEntity.ok(new MessageResponse("Declaratie succesvol verandert"));
     }
 
     @Override
-    public ResponseEntity<?> updateDeclaration(String token, DeclarationRequest declarationRequest){
+    public ResponseEntity<?> checkDeclaration(String token, DeclarationRequest declarationRequest){
 
-        System.out.println("bla decla--> " + declarationRequest.getId());
         Declaration declaration;
         if(declarationExist(declarationRequest.getId())) {
             declaration = declarationRepository.getOne(declarationRequest.getId());
         }else {
-            return ResponseEntity.ok("declaratie bestaat niet");
+            return ResponseEntity.ok(new MessageResponse("declaratie bestaat niet"));
         }
         if(!declarationRequest.getCorrect()){
             declaration.setChecked(true);
@@ -173,7 +176,16 @@ public class DeclarationServiceImpl implements DeclarationService {
             declaration.setCorrect(true);
             declarationRepository.save(declaration);
         }
-        return ResponseEntity.ok("declaratie verandert");
+        return ResponseEntity.ok(new MessageResponse("declaratie verandert"));
+    }
+
+    @Override
+    public ResponseEntity<?> deleteDeclaration(long id){
+
+        Declaration declaration =declarationRepository.getOne(id);
+        declarationRepository.deleteById(id);
+        billService.updateBillWhenDeclarationsChange(declaration.getHouse().getId(), declaration.getMonth(), declaration.getYear());
+        return ResponseEntity.ok(new MessageResponse("Declaratie succesvol verwijdert"));
     }
 
     private boolean declarationExist(long id){
@@ -195,6 +207,10 @@ public class DeclarationServiceImpl implements DeclarationService {
                         user.getLastName(),
                         declaration.getGroceriesAmount(),
                         fileDB.getNameFile());
+                declarationResponse.setChecked(declaration.isChecked());
+                declarationResponse.setCorrect(declaration.isCorrect());
+                declarationResponse.setMonth(declaration.getMonth());
+                declarationResponse.setYear(declaration.getYear());
                 declarationResponses.add(declarationResponse);
             }
         }

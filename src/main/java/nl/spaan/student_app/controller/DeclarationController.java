@@ -50,11 +50,11 @@ public class DeclarationController {
                                                @RequestBody DeclarationRequest declarationRequest) {
         return declarationService.storeDeclaration(headers.get("authorization"),declarationRequest);
     }
-    @PutMapping("/update")
+    @PutMapping("/checked")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<?> updateDeclaration(@RequestHeader Map<String, String> headers,
+    public ResponseEntity<?> checkDeclaration(@RequestHeader Map<String, String> headers,
                                                @RequestBody DeclarationRequest declarationRequest){
-        return declarationService.updateDeclaration(headers.get("authorization"),declarationRequest);
+        return declarationService.checkDeclaration(headers.get("authorization"),declarationRequest);
     }
 
     @PutMapping("/edit")
@@ -62,6 +62,12 @@ public class DeclarationController {
     public ResponseEntity<?> editDeclaration(@RequestHeader Map<String, String> headers,
                                              @RequestBody DeclarationRequest declarationRequest){
             return declarationService.editDeclaration(headers.get("authorization"),declarationRequest);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> deleteDeclaration(@PathVariable("id") long id){
+        return declarationService.deleteDeclaration(id);
     }
 
 

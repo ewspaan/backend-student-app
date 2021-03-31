@@ -15,4 +15,6 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
     Collection<? extends Bill> findByHouseId(long houseId);
 
     Bill findByHouseIdAndMonthAndYear(long id, int month, int year);
+
+    List<Bill> findAllByPayed(boolean b);
 }

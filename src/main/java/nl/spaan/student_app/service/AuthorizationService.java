@@ -13,6 +13,7 @@ import nl.spaan.student_app.repository.UserRepository;
 import nl.spaan.student_app.service.security.jwt.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -76,17 +77,9 @@ public class AuthorizationService {
 
     public ResponseEntity<MessageResponse> registerUser(@Valid SignupRequest signUpRequest) {
         if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))) {
-            System.out.println("Username used-->");
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Username of Email is al in gebruik"));
-        }
-
-        if (Boolean.TRUE.equals(userRepository.existsByEmail(signUpRequest.getEmail()))) {
-            System.out.println("email used-->");
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Username of Email is al in gebruik"));
+                    .body(new MessageResponse("Error: Username is al in gebruik"));
         }
 
         // Create new users account samen met nieuw house account.
@@ -104,9 +97,7 @@ public class AuthorizationService {
 
         Set<Role> roles = new HashSet<>();
         Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR).orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
-        //System.out.println("Role first1-->" + modRole.getName() + modRole.getId());
         roles.add(modRole);
-        //System.out.println("Role first2-->" + roles);
         user.setRoles(roles);
         house.setAccount(account);
         account.setHouse(house);
@@ -114,7 +105,7 @@ public class AuthorizationService {
         houseRepository.save(house);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("Je bent geregistreerd"));
     }
 
     //Voeg huisgenoten toe aan huis
@@ -124,20 +115,21 @@ public class AuthorizationService {
             System.out.println(signUpRequest.getEmail());
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Niet toegestaan"));
+                    .body(new MessageResponse("Error: Niet toegestaan. Meld je aan als huisoudste of laat je toevoegen aan het huis."));
         }
 
         User user = userRepository.findByEmail(signUpRequest.getEmail());
-        user.setFirstName(signUpRequest.getFirstName());
-        user.setLastName(signUpRequest.getLastName());
+
         if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))) {
-            System.out.println(signUpRequest.getUsername());
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Username is al in gebruik"));
+                    .body(new MessageResponse("Error: Username is al in gebruik"));
         }
         user.setUsername(signUpRequest.getUsername());
+        user.setFirstName(signUpRequest.getFirstName());
+        user.setLastName(signUpRequest.getLastName());
         user.setEmail(signUpRequest.getEmail());
+        user.setDateOfBirth(signUpRequest.getDateOfBirth());
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
         
         House house = houseRepository.findById(signUpRequest.getHouseId()).orElseThrow(() -> new RuntimeException(HOUSE_NOT_FOUND_ERROR));

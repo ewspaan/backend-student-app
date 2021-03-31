@@ -3,6 +3,7 @@ package nl.spaan.student_app.service;
 import nl.spaan.student_app.model.*;
 import nl.spaan.student_app.payload.response.BillResponse;
 import nl.spaan.student_app.payload.response.BillResponseUser;
+import nl.spaan.student_app.payload.response.MessageResponse;
 import nl.spaan.student_app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,7 @@ public class BillServiceImpl implements BillService {
             bill.setYear(year);
             bill.setTotalDeclarations(0);
             bill.setTotalAmount(0);
+            bill.setPayAble(false);
             billRepository.save(bill);
             for( User user : users){
                 BillUser billUser = new BillUser();
@@ -81,11 +83,8 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public void updateBillWithDeclaration(Declaration declaration){
+    public void updateBillWhenDeclarationsChange(long id, int month, int year){
 
-        int month = declaration.getMonth();
-        int year = declaration.getYear();
-        long id = declaration.getHouse().getId();
         if (!checkIfBillMonthExist(id, month, year)){
             createBill(id,month,year);
         }
@@ -93,24 +92,38 @@ public class BillServiceImpl implements BillService {
         if(bill.isPayed()){
             return;
         }
-        bill.setTotalDeclarations(bill.getTotalDeclarations()+declaration.getGroceriesAmount());
+        // calculeer totaal aan declaraties voor de maand/jaar van dit huis
+        bill.setTotalDeclarations(getAmountDeclarationsMonthHouse(id,month,year));
 
         List<User> roommates = new ArrayList<>(bill.getHouse().getUserList());
         for (User user : roommates) {
-            BillUser billUser = billUserRepository.findByUserIdAndBillId(user.getId(), bill.getId());
-            if(user == declaration.getUser()) {
-                billUser.setTotalDeclarations(billUser.getTotalDeclarations() + declaration.getGroceriesAmount());
-            }
-            billUser.setAmountToPay(((
-                        bill.getTotalDeclarations() + bill.getTotalUtilities())
-                        / bill.getHouse().getUserList().size())
-                        - billUser.getTotalDeclarations());
+            BillUser billUser = billUserRepository.findByUserIdAndBillId(user.getId(),bill.getId());
+            billUser.setTotalDeclarations(getAmountDeclarationsMonthUser(user,month,year));
+            billUser.setAmountToPay( ( (bill.getTotalUtilities()+bill.getTotalDeclarations()) /roommates.size() ) - billUser.getTotalDeclarations() );
             billUserRepository.save(billUser);
         }
-
         billRepository.save(bill);
+    }
+    private double getAmountDeclarationsMonthUser (User user, int month, int year){
 
+        double amount = 0;
+        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByUserIdAndMonthAndYear(user.getId(), month, year));
+        for (Declaration declaration : declarations) {
+            if (declaration.getYear() == year && declaration.getMonth() == month) {
+                amount += declaration.getGroceriesAmount();
+            }
+        }
+        return amount;
+    }
+    private double getAmountDeclarationsMonthHouse (long houseId, int month, int year){
 
+        double amount = 0;
+        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByHouseIdAndMonthAndYear(houseId, month, year));
+        declarations.removeIf(declaration -> declaration.getYear() != year && declaration.getMonth() != month);
+        for (Declaration declaration : declarations){
+            amount += declaration.getGroceriesAmount();
+        }
+        return amount;
     }
 
     @Override
@@ -143,42 +156,12 @@ public class BillServiceImpl implements BillService {
         LocalDate date = LocalDate.now();
         int month = date.getMonthValue();
         int year = date.getYear();
-        //Vul lijst met alle rekeningen van een huis
+
         if (!checkIfBillMonthExist(houseId, month, year)){
             createBill(houseId,month,year);
         }
-        List<Bill> billHouses = new ArrayList<>(billRepository.findByHouseId(houseId));
-        //maak lijst voor de response
-        List<BillResponse> billResponses = new ArrayList<>();
-        for (Bill billHouse : billHouses) {
-            //voeg eerst de algemen huisrekening toe
-            BillResponse billResponse = new BillResponse();
-            billResponse.setTotalAmountUtilities(billHouse.getTotalUtilities());
-            billResponse.setTotalAmountDeclarations(billHouse.getTotalDeclarations());
-            billResponse.setMonth(billHouse.getMonth());
-            billResponse.setYear(billHouse.getYear());
-            billResponse.setPayed(billHouse.isPayed());
-            billResponse.setTotalAmountMonth(billHouse.getTotalUtilities() + billHouse.getTotalDeclarations());
-            List<BillUser> billUsers = new ArrayList<>(billUserRepository.findAll());
-            List<BillResponseUser> billResponseUsers = new ArrayList<>();
-            //voeg daarna de individuele rekeningen toe
-            for (BillUser billUser : billUsers) {
-                if (billUser.getBill().getId() == billHouse.getId()) {
-                    BillResponseUser billResponseUser = new BillResponseUser();
-                    billResponseUser.setMonth(billUser.getBill().getMonth());
-                    billResponseUser.setYear(billUser.getBill().getYear());
-                    billResponseUser.setId(billUser.getId());
-                    billResponseUser.setFirstName(billUser.getUser().getFirstName());
-                    billResponseUser.setLastName(billUser.getUser().getLastName());
-                    billResponseUser.setDeclarationsUser(billUser.getTotalDeclarations());
-                    billResponseUser.setToPayMonth(billUser.getAmountToPay());
-                    billResponseUsers.add(billResponseUser);
-                }
-            }
-            billResponse.setBillResponseUsers(billResponseUsers);
-            billResponses.add(billResponse);
-        }
-        return ResponseEntity.ok(billResponses);
+        makeBillHousePayAble(houseId);
+        return ResponseEntity.ok(createHouseBillResponse(houseId));
     }
 
     @Override
@@ -200,14 +183,13 @@ public class BillServiceImpl implements BillService {
         billUser.setPayed(true);
         billUserRepository.save(billUser);
         toggleHouseBillPayed(billUser.getBill().getId());
-        return ResponseEntity.ok("Rekening is betaalt");
+        return ResponseEntity.ok(new MessageResponse("Rekening is betaalt"));
     }
 
     @Override
     public ResponseEntity<?> getHouseBillUser(String token, boolean payed){
 
         List<BillUser> billUsers = userService.findUserNameFromToken(token).getUserBill();
-        System.out.println("billuserpersonal--> " + billUsers.size());
         List<BillResponseUser> bills = new ArrayList<>();
         for (BillUser billUser : billUsers) {
             if (billUser.isPayed() == payed) {
@@ -221,6 +203,85 @@ public class BillServiceImpl implements BillService {
             }
         }
         return ResponseEntity.ok(bills);
+    }
+
+    private void makeBillHousePayAble(long houseId){
+
+        LocalDate date = LocalDate.now();
+        int monthNow = date.getMonthValue();
+        int yearNow = date.getYear();
+        List<Bill> bills = billRepository.findAllByPayed(false);
+        for (Bill bill: bills){
+            if( !(bill.getYear() == yearNow && bill.getMonth() == monthNow)){
+                if (checkIfAllDeclarationAreCorrect(houseId,bill.getMonth(),bill.getYear())){
+                    bill.setPayAble(true);
+                    billRepository.save(bill);
+                }
+            }
+        }
+    }
+
+    private boolean checkIfAllDeclarationAreCorrect(long houseId, int month, int year){
+
+        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByHouseIdAndMonthAndYear(houseId,month,year));
+        boolean correct = true;
+        if(declarations.isEmpty()){
+            return true;
+        }
+        for(Declaration declaration : declarations){
+            if(!declaration.isCorrect() || !declaration.isChecked()){
+                correct = false;
+            }
+        }
+        return correct;
+    }
+
+    private List<BillResponse> createHouseBillResponse(long houseId){
+
+        //Vul lijst met alle rekeningen van een huis
+        List<Bill> billHouses = new ArrayList<>(billRepository.findByHouseId(houseId));
+        //verwijder de rekeningen die nog niet betaald mogen worden ivm met de declaraties
+        Iterator itr = billHouses.iterator();
+        while (itr.hasNext())
+        {
+            Bill bill = (Bill)itr.next();
+            if(!bill.isPayAble()) {
+                itr.remove();
+            }
+        }
+        //maak lijst voor de response
+        List<BillResponse> billResponses = new ArrayList<>();
+        for (Bill billHouse : billHouses) {
+            //voeg eerst de algemene huisrekening toe
+            BillResponse billResponse = new BillResponse();
+            billResponse.setTotalAmountUtilities(billHouse.getTotalUtilities());
+            billResponse.setTotalAmountDeclarations(billHouse.getTotalDeclarations());
+            billResponse.setMonth(billHouse.getMonth());
+            billResponse.setYear(billHouse.getYear());
+            billResponse.setPayed(billHouse.isPayed());
+            billResponse.setTotalAmountMonth(billHouse.getTotalUtilities() + billHouse.getTotalDeclarations());
+            List<BillUser> billUsers = new ArrayList<>(billUserRepository.findAll());
+            List<BillResponseUser> billResponseUsers = new ArrayList<>();
+            //voeg daarna de individuele rekeningen toe
+            for (BillUser billUser : billUsers) {
+                if (billUser.getBill().getId() == billHouse.getId()) {
+                    BillResponseUser billResponseUser = new BillResponseUser();
+                    billResponseUser.setMonth(billUser.getBill().getMonth());
+                    billResponseUser.setYear(billUser.getBill().getYear());
+                    billResponseUser.setId(billUser.getId());
+                    billResponseUser.setFirstName(billUser.getUser().getFirstName());
+                    billResponseUser.setLastName(billUser.getUser().getLastName());
+                    billResponseUser.setDeclarationsUser(billUser.getTotalDeclarations());
+                    billResponseUser.setToPayMonth(billUser.getAmountToPay());
+                    billResponseUser.setPayed(billUser.isPayed());
+                    billResponseUsers.add(billResponseUser);
+                }
+            }
+            billResponse.setBillResponseUsers(billResponseUsers);
+            billResponses.add(billResponse);
+        }
+        return (billResponses);
+
     }
 
     private void toggleHouseBillPayed(long billId){
@@ -240,30 +301,32 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private double getAmountDeclarationsMonthUser (User user, int month, int year){
+    @Override
+    public ResponseEntity<?> createBillByRandomYear(long houseId){
 
-        double amount = 0;
-        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByUserIdAndMonthAndYear(user.getId(), month, year));
-        for (Declaration declaration : declarations) {
-            if (declaration.getYear() == year && declaration.getMonth() == month) {
-                amount += declaration.getGroceriesAmount();
-                System.out.println("bla amount user" + amount);
+        LocalDate date = LocalDate.now();
+        int month = date.getMonthValue();
+        int year = date.getYear();
+        if (!checkIfBillMonthExist(houseId, month, year)){
+            return ResponseEntity.ok(new MessageResponse("Er is nog geen rekening voor deze maand"));
+        }
+        if (!checkIfAllDeclarationAreCorrect(houseId,month,year)){
+            return ResponseEntity.ok(new MessageResponse("Niet alle declaraties zijn gekeurd"));
+        }
+        Bill bill = billRepository.findByHouseIdAndMonthAndYear(houseId,month,year);
+        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByHouseIdAndMonthAndYear(houseId,month,year));
+        if (bill != null) {
+            int random = (int) (Math.random() * 9999 + 1);
+            if (!declarations.isEmpty()) {
+                for (Declaration declaration : declarations) {
+                    declaration.setYear(random);
+                    declarationRepository.save(declaration);
+                }
+                bill.setYear(random);
+                billRepository.save(bill);
+                return ResponseEntity.ok(new MessageResponse("Jaar verandert"));
             }
         }
-        return amount;
+        return ResponseEntity.ok(new MessageResponse("Er is nog geen rekening voor deze maand"));
     }
-
-    private double getAmountDeclarationsMonthHouse (long houseId, int month, int year){
-
-        double amount = 0;
-        List<Declaration> declarations = new ArrayList<>(declarationRepository.findAllByHouseIdAndMonthAndYear(houseId, month, year));
-        declarations.removeIf(declaration -> declaration.getYear() != year && declaration.getMonth() != month);
-        for (Declaration declaration : declarations){
-            amount += declaration.getGroceriesAmount();
-            System.out.println("bla amount house" + amount);
-        }
-
-        return amount;
-    }
-
 }

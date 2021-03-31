@@ -25,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
         long id = userService.findUserNameFromToken(token).getHouse().getId();
         if (accountRepository.existsByHouseId(id)) {
             Account account = accountRepository.findByHouseId(id);
-
+            System.out.println("bla account--> " + updateAccountRequest.getAccountNumber());
             if (updateAccountRequest.getAccountNumber() != null && !updateAccountRequest.getAccountNumber().isEmpty()) {
                 account.setAccountNumber(updateAccountRequest.getAccountNumber());
             }
@@ -78,6 +78,7 @@ public class AccountServiceImpl implements AccountService {
 
         return ResponseEntity.ok("Huisrekening bestaat nog niet");
     }
+
     private double addUtilities(Account account){
         return account.getElektraUtility()+
                             account.getGasUtility()+
