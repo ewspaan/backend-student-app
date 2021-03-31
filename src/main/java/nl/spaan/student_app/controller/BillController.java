@@ -1,6 +1,5 @@
 package nl.spaan.student_app.controller;
 
-import nl.spaan.student_app.payload.request.BillRequest;
 import nl.spaan.student_app.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +25,12 @@ public class BillController {
     @PreAuthorize("hasRole('MODERATOR')")
     ResponseEntity<?> togglePayedBill(@PathVariable("billId") long billId){
         return billService.togglePayed(billId);
+    }
+
+    @PutMapping("/create/{houseId}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    ResponseEntity<?> createBill(@PathVariable("houseId") long houseId){
+        return billService.createBillByRandomYear(houseId);
     }
 
     @GetMapping("/house/{houseId}")

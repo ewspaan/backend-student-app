@@ -27,8 +27,8 @@ INSERT INTO accounts (house_id , account_number, elektra_utility, gas_utility, i
                       water_utility, total_amount_utilities)  VALUES ((SELECT house_id FROM app_users where username = 'macbla') , '12345678' , 12.50 , 12.80, 17.20 , 17.50, 60);
 
 
-insert into bills ( month, payed, total_amount, total_declarations, total_utilities, year, house_id) values ( '369', true, 13.22, 81.66, 14.62, 2010, (SELECT house_id FROM app_users where username = 'macbla'));
-insert into bills ( month, payed, total_amount, total_declarations, total_utilities, year, house_id) values ( '000', true, 78.23, 80.69, 89.12, 2010, (SELECT house_id FROM app_users where username = 'macbla'));
-insert into bills ( month, payed, total_amount, total_declarations, total_utilities, year, house_id) values ( '910', true, 28.74, 16.01, 99.74, 1999, (SELECT house_id FROM app_users where username = 'macbla'));
-insert into bills ( month, payed, total_amount, total_declarations, total_utilities, year, house_id) values ( '69', true, 82.13, 36.43, 12.95, 1999, (SELECT house_id FROM app_users where username = 'macbla'));
-insert into bills ( month, payed, total_amount, total_declarations, total_utilities, year, house_id) values ( '51', true, 57.76, 91.18, 10.83, 2012, (SELECT house_id FROM app_users where username = 'macbla'));
+insert into bills ( month, payed, pay_able, total_amount, total_declarations, total_utilities, year, house_id) values ( '3', true,true, 0, 81.66, 14.62, 2020, (SELECT house_id FROM app_users where username = 'macbla'));
+insert into bills ( month, payed, pay_able, total_amount, total_declarations, total_utilities, year, house_id) values ( '4', true, true,0, 80.69, 89.12, 2020, (SELECT house_id FROM app_users where username = 'macbla'));
+insert into bills ( month, payed, pay_able, total_amount, total_declarations, total_utilities, year, house_id) values ( '5', true, true,0, 16.01, 99.74, 2020, (SELECT house_id FROM app_users where username = 'macbla'));
+insert into bills ( month, payed, pay_able, total_amount, total_declarations, total_utilities, year, house_id) values ( '6', true, true,0, 36.43, 12.95, 2020, (SELECT house_id FROM app_users where username = 'macbla'));
+insert into bills ( month, payed, pay_able, total_amount, total_declarations, total_utilities, year, house_id) values ( '7', true, true,0, 91.18, 10.83, 2020, (SELECT house_id FROM app_users where username = 'macbla'));

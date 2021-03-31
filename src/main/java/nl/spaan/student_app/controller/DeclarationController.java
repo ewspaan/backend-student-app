@@ -2,15 +2,12 @@ package nl.spaan.student_app.controller;
 
 
 import nl.spaan.student_app.payload.request.DeclarationRequest;
-import nl.spaan.student_app.payload.response.UploadResponseMessage;
 import nl.spaan.student_app.service.DeclarationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -53,11 +50,11 @@ public class DeclarationController {
                                                @RequestBody DeclarationRequest declarationRequest) {
         return declarationService.storeDeclaration(headers.get("authorization"),declarationRequest);
     }
-    @PutMapping("/update")
+    @PutMapping("/checked")
     @PreAuthorize("hasRole('MODERATOR')")
-    public ResponseEntity<?> updateDeclaration(@RequestHeader Map<String, String> headers,
+    public ResponseEntity<?> checkDeclaration(@RequestHeader Map<String, String> headers,
                                                @RequestBody DeclarationRequest declarationRequest){
-        return declarationService.updateDeclaration(headers.get("authorization"),declarationRequest);
+        return declarationService.checkDeclaration(headers.get("authorization"),declarationRequest);
     }
 
     @PutMapping("/edit")
@@ -65,6 +62,12 @@ public class DeclarationController {
     public ResponseEntity<?> editDeclaration(@RequestHeader Map<String, String> headers,
                                              @RequestBody DeclarationRequest declarationRequest){
             return declarationService.editDeclaration(headers.get("authorization"),declarationRequest);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> deleteDeclaration(@PathVariable("id") long id){
+        return declarationService.deleteDeclaration(id);
     }
 
 

@@ -1,6 +1,8 @@
 package nl.spaan.student_app.payload.response;
 
+
 public class MessageResponse {
+
     private String message;
 
     public MessageResponse(String message) {

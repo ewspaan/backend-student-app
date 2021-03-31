@@ -6,13 +6,13 @@ import nl.spaan.student_app.model.House;
 import nl.spaan.student_app.model.User;
 import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.UpdateUserRequest;
-import nl.spaan.student_app.payload.response.DeclarationResponse;
 import nl.spaan.student_app.payload.response.UserResponse;
 import nl.spaan.student_app.payload.response.MessageResponse;
-import nl.spaan.student_app.repository.HouseRepository;
 import nl.spaan.student_app.repository.UserRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,46 +26,36 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Value("${spaan.sec.jwtSecret}")
-    private String jwtSecret;
-
-    @Value("${spaan.sec.emailHost}")
-    private String emailHost;
-
-    @Value("${spaan.sec.emailPort}")
-    private int emailPort;
-
-    @Value("${spaan.sec.emailUserName}")
-    private String emailUserName;
-
-    @Value("${spaan.sec.emailPassword}")
-    private String emailPassword;
 
     private static final String PREFIX = "Bearer ";
 
+    @Value("${spaan.sec.jwtSecret}")
+    private String jwtSecret;
+
+    private EmailService emailService;
+
     private UserRepository userRepository;
-    private HouseRepository houseRepository;
+
     private PasswordEncoder encoder;
 
     @Override
     public ResponseEntity<?> getAllRoommates(String token) {
 
         User user = findUserNameFromToken(token);
-        System.out.println("bla1234");
-
         List<User> users = userRepository.findAllByHouseId(user.getHouse().getId());
 
-        if(users.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Geen huisgenoten gevonden"));
+        if(users.size() == 1) {
+            return ResponseEntity.ok().body(new MessageResponse("Geen huisgenoten gevonden"));
         }
-        System.out.println("Users--> " + users.get(0).getFirstName());
         List<UserResponse> roommates = new ArrayList<>();
-        for ( int i = 0; i< users.size(); i++ ){
-            UserResponse userResponse = new UserResponse();
-            userResponse.setUsername(users.get(i).getUsername());
-            userResponse.setFirstName(users.get(i).getFirstName());
-            userResponse.setLastName(users.get(i).getLastName());
-            roommates.add(userResponse);
+        for (User value : users) {
+            if(!value.getUsername().equals(user.getUsername())) {
+                UserResponse userResponse = new UserResponse();
+                userResponse.setUsername(value.getUsername());
+                userResponse.setFirstName(value.getFirstName());
+                userResponse.setLastName(value.getLastName());
+                roommates.add(userResponse);
+            }
         }
         return ResponseEntity.ok(roommates);
     }
@@ -77,11 +67,9 @@ public class UserServiceImpl implements UserService {
         }
         String username =  getUsernameFromToken(token);
 
-        System.out.println("Bla update--> " + username);
         if(userExists(username) && updateRequestIsValid(userRequest)) {
-            System.out.println("Bla update-2-> " + username);
-            User updatedUser = findUserByUsername(username);
 
+            User updatedUser = findUserByUsername(username);
 
             if(userRequest.getFirstName() != null && !userRequest.getFirstName().isEmpty()) {
                 updatedUser.setFirstName(userRequest.getFirstName());
@@ -91,11 +79,10 @@ public class UserServiceImpl implements UserService {
             }
 
             if(userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) {
-                System.out.println("Bla update-3 2-> " + username);
-                if(!userRepository.existsByEmail(userRequest.getEmail())){
-                    updatedUser.setEmail(userRequest.getEmail());
-                    System.out.println("Bla update-email-> ");
+                if(userRepository.existsByEmail(userRequest.getEmail())){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is al in gebruik");
                 }
+                updatedUser.setEmail(userRequest.getEmail());
             }
             if(userRequest.getDateOfBirth() != null && !userRequest.getDateOfBirth().isEmpty()) {
                 updatedUser.setDateOfBirth(userRequest.getDateOfBirth());
@@ -104,15 +91,14 @@ public class UserServiceImpl implements UserService {
                 updatedUser.setPassword(encoder.encode(userRequest.getPassword()));
             }
             //voorlopig is het niet mogelijk om username te updaten ivm met jwt token
-            if(userRequest.getUsername() != null && !userRequest.getUsername().isEmpty()) {
-                if(!userRepository.existsByUsername(userRequest.getUsername())){
-                    return ResponseEntity.badRequest().body(new MessageResponse("User cannot be updated with provided data."));
-                }
-            }
+//            if(userRequest.getUsername() != null && !userRequest.getUsername().isEmpty()) {
+//                if(!userRepository.existsByUsername(userRequest.getUsername())){
+//                    return ResponseEntity.badRequest().body(new MessageResponse("User cannot be updated with provided data."));
+//                }
+//            }
             userRepository.save(updatedUser);
             return ResponseEntity.ok().body("User succesvol geupdate");
         }
-
         return ResponseEntity.badRequest().body(new MessageResponse("User cannot be updated with provided data."));
     }
 
@@ -135,7 +121,6 @@ public class UserServiceImpl implements UserService {
 
         UserResponse profileResponse = createCommonResponse(user);
 
-        System.out.println("profileResponse" + profileResponse.getAccountNumber());
         House house = user.getHouse();
 
         String houseName = house.getHouseName();
@@ -149,40 +134,31 @@ public class UserServiceImpl implements UserService {
     // Voeg huisgenoot toe aan huis en genereer email met link naar signup pagina huisgenoot
     @Override
     public ResponseEntity<?> addUserToHouse( String token, AddRequest addRequest) {
-        //TODO email sturen bij al in gebruik zijnde email
-        if(token == null || token.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Invalid token"));
+        if (Boolean.TRUE.equals(userRepository.existsByHouseIdAndEmail(findUserNameFromToken(token).getHouse().getId(),addRequest.getEmail()))) {
+            //return ResponseEntity.badRequest().body(new MessageResponse("Email is al toegevoegd aan huis"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is al in gebruik");
         }
-       if (Boolean.TRUE.equals(userRepository.existsByEmail(addRequest.getEmail()))) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Username of Email is al in gebruik"));
-        }
+
         //maak nieuwe user
         User newUser = new User();
-        newUser.setFirstName(addRequest.getFirstName());
-        newUser.setLastName(addRequest.getLastName());
+        if(addRequest.getFirstName().isEmpty()){
+            newUser.setFirstName("Nieuwe huisgenoot");
+        }else {
+            newUser.setFirstName(addRequest.getFirstName());
+        }
+        if (addRequest.getLastName().isEmpty()){
+            newUser.setLastName(addRequest.getEmail());
+        }else {
+            newUser.setLastName(addRequest.getLastName());
+        }
+        newUser.setUsername(createRandomUsername(addRequest.getEmail()));
         newUser.setEmail(addRequest.getEmail());
-
-        String username = getUsernameFromToken(token);
-        User user = findUserByUsername(username);
-
-        House house = user.getHouse();
-
-        newUser.setHouse(house);
+        newUser.setHouse(findUserNameFromToken(token).getHouse());
         userRepository.save(newUser);
 
-        new EmailServiceImpl(
-                emailHost,
-                emailPort,
-                emailUserName,
-                emailPassword,
-                newUser.getFirstName(),
-                newUser.getLastName(),
-                newUser.getEmail(),
-                house.getId()
-        );
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        emailService.sendMail(newUser);
+
+        return ResponseEntity.ok(new MessageResponse("Huisgenoot succesvol toegevoegd"));
     }
     @Override
     public ResponseEntity<?> deleteUser(String username){
@@ -190,10 +166,24 @@ public class UserServiceImpl implements UserService {
         if (userExists(username)){
             User user = findUserByUsername(username);
             userRepository.deleteById(user.getId());
-            System.out.println("delete--> " + username);
+            return ResponseEntity.ok("Huisgenoot verwijdert");
         }
-        return ResponseEntity.ok("Huisgenoot verwijdert");
+        return ResponseEntity.badRequest().body("Huisgenoot niet gevonden");
     }
+    private String createRandomUsername(String email){
+
+
+        email = email.replace("@","");
+        if (Boolean.FALSE.equals(userRepository.existsByUsername(email))) {
+            return email;
+        }else {
+            int length = 5;
+            String generatedString = RandomStringUtils.random(length, false, true);
+            email += generatedString;
+        }
+        return email;
+    }
+
 
 
     private String getUsernameFromToken(String token) {
@@ -230,7 +220,6 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         if(userExists(username)) {
             user = findUserByUsername(username);
-            System.out.println("User-->  " + user.getUsername());
         }
         return(user);
     }
@@ -277,7 +266,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Autowired
-    public void setHouseRepository(HouseRepository houseRepository) {
-        this.houseRepository = houseRepository;
+    public void setEmailService(EmailService emailService) {
+        this.emailService = emailService;
     }
 }

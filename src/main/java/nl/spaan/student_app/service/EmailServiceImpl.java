@@ -1,5 +1,9 @@
 package nl.spaan.student_app.service;
 
+import nl.spaan.student_app.model.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -8,41 +12,41 @@ import javax.mail.internet.MimeMultipart;
 import java.io.File;
 import java.util.Properties;
 
+@Service
 public class EmailServiceImpl implements EmailService{
 
-    private String host;
-    private int port;
-    private String username;
-    private String password;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private Long houseId;
+
+    @Value("${spaan.sec.emailHost}")
+    private String emailHost;
+
+    @Value("${spaan.sec.emailPort}")
+    private int emailPort;
+
+    @Value("${spaan.sec.emailUserName}")
+    private String emailUserName;
+
+    @Value("${spaan.sec.emailPassword}")
+    private String emailPassword;
 
 
-    public EmailServiceImpl(String host, int port, String username, String password, String firstName, String lastName, String email, Long houseId) {
-
-        this.host = host;
-        this.port = port;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.houseId = houseId;
-
-        sendMail();
-    }
     //Maak body voor email met daar inde informatie om je aan te melden voor het huis als huisgenoot.
-    @Override
-    public String CreateEmailBody(){
+    private String CreateEmailBody(User user){
+
         String message;
+        String firstName = user.getFirstName();
+        String lastName = user.getLastName();
+        String email = user.getEmail();
+        long houseId = user.getHouse().getId();
 
         //TODO volledige naam toevoegen
         if( firstName == null) {
             message = "<i>Hallo Student</i><br>";
+            firstName = "voornaam";
         }else{
             message = "<i>Hallo " +  firstName + "</i><br>";
+        }
+        if( lastName == null){
+            lastName = "achternaam";
         }
         message += "<b>Welkom in dit huis.</b><br>";
         message += "meld je aan via deze link<br>";
@@ -59,19 +63,19 @@ public class EmailServiceImpl implements EmailService{
     }
 
     @Override
-    public void sendMail() {
+    public void sendMail(User user) {
 
         Properties prop = new Properties();
         prop.put("mail.smtp.auth", true);
         prop.put("mail.smtp.starttls.enable", "true");
-        prop.put("mail.smtp.host", host);
-        prop.put("mail.smtp.port", port);
-        prop.put("mail.smtp.ssl.trust", host);
+        prop.put("mail.smtp.host", emailHost);
+        prop.put("mail.smtp.port", emailPort);
+        prop.put("mail.smtp.ssl.trust", emailHost);
 
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
+                return new PasswordAuthentication(emailUserName, emailPassword);
             }
         });
 
@@ -79,10 +83,10 @@ public class EmailServiceImpl implements EmailService{
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress("StudentApp@Student.app"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getEmail()));
             message.setSubject("Aanmelden Als Huisgenoot van Huize");
 
-            String msg = CreateEmailBody();
+            String msg = CreateEmailBody(user);
 
             MimeBodyPart mimeBodyPart = new MimeBodyPart();
             mimeBodyPart.setContent(msg, "text/html");

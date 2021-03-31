@@ -40,8 +40,6 @@ public class UserDetailsImpl implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
 
-        System.out.println("UDI build " + authorities.get(0) + user.getUsername());
-
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),

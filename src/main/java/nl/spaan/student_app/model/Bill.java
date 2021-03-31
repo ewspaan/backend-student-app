@@ -17,6 +17,7 @@ public class Bill {
     private double totalDeclarations;
     private double totalAmount;
     private boolean payed;
+    private boolean payAble;
 
     @ManyToOne
     @JoinColumn(name = "house_id", nullable = false)
@@ -97,5 +98,13 @@ public class Bill {
 
     public void setBillsUser(List<BillUser> userBills) {
         this.BillsUser = userBills;
+    }
+
+    public boolean isPayAble() {
+        return payAble;
+    }
+
+    public void setPayAble(boolean payAble) {
+        this.payAble = payAble;
     }
 }
