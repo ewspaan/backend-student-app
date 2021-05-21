@@ -1,7 +1,6 @@
 package nl.spaan.student_app.service;
 
 import nl.spaan.student_app.model.*;
-import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.LoginRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.payload.response.JwtResponse;
@@ -13,7 +12,6 @@ import nl.spaan.student_app.repository.UserRepository;
 import nl.spaan.student_app.service.security.jwt.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -167,8 +165,8 @@ public class AuthorizationService {
 
         return ResponseEntity.ok(new JwtResponse(jwt,
                                 userDetails.getId(),
-                                userDetails.getFirstName(),
                                 userDetails.getUsername(),
+                                userDetails.getFirstName(),
                                 userDetails.getEmail(),
                                 role));
 
