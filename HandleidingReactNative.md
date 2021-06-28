@@ -12,10 +12,16 @@ Installatie:
 =
 React Native installatie:
 -
-- Instaleer expo met npm install -g --unsafe-perms expo-cli.
+- Instaleer expo met 'npm install -g --unsafe-perms expo-cli'.
+- Instaleer de camera elementen met 'expo install expo-camera'.
+- Instaleer Axios met 'npm install axios'.
+- Instaleer de AsyncStorage met 'npm install @react-native-async-storage/async-storage'.
+- Instaleer FileSystem met 'expo install expo-file-system'.
+- Instaleer React Native Elements met 'npm install react-native-elements'.  
 - Open het zip bestand en verplaats de folder naar je projecten volder van je IDE.
-- Open de directory waar je project in staat en typ in de console npm run start. Het project opent in de webbrowser.
+- Open de directory waar je project in staat en typ in de console 'npm run start'. Het project opent in de webbrowser.
 - Instaleer expo op je telefoon en scan de QR-code die op de webbrowser staat.
+
 
 Test gebruikers:
 -
