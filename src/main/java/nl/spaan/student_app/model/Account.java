@@ -1,8 +1,5 @@
 package nl.spaan.student_app.model;
 
-
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 
 @Entity

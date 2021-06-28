@@ -26,4 +26,6 @@ public interface UserService {
 
 
     ResponseEntity<?> deleteUser(String username);
+
+    ResponseEntity<?> promoteUser(String username);
 }

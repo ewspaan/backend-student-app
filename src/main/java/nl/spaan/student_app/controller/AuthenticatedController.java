@@ -1,6 +1,5 @@
 package nl.spaan.student_app.controller;
 
-import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.LoginRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.payload.response.JwtResponse;
@@ -8,7 +7,6 @@ import nl.spaan.student_app.payload.response.MessageResponse;
 import nl.spaan.student_app.service.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*", maxAge = 3_600)

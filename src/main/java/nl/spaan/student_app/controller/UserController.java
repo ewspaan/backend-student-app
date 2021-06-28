@@ -65,4 +65,10 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable("username") String username){
         return userService.deleteUser(username);
     }
+
+    @PostMapping( "/promote/{username}")
+    @PreAuthorize("hasRole('MODERATOR')")
+    public ResponseEntity<?> promoteUser(@PathVariable("username") String username) {
+        return userService.promoteUser(username);
+    }
 }

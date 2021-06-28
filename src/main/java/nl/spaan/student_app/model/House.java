@@ -1,11 +1,7 @@
 package nl.spaan.student_app.model;
 
-
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "houses")
@@ -18,7 +14,7 @@ public class House {
 
     @OneToMany(
             mappedBy = "house",
-            fetch = FetchType.LAZY)
+            fetch = FetchType.EAGER)
     private List<User> userList;
 
     @OneToMany(

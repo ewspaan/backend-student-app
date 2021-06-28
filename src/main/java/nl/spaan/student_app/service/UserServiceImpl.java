@@ -2,12 +2,15 @@ package nl.spaan.student_app.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import nl.spaan.student_app.model.ERole;
 import nl.spaan.student_app.model.House;
+import nl.spaan.student_app.model.Role;
 import nl.spaan.student_app.model.User;
 import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.UpdateUserRequest;
 import nl.spaan.student_app.payload.response.UserResponse;
 import nl.spaan.student_app.payload.response.MessageResponse;
+import nl.spaan.student_app.repository.RoleRepository;
 import nl.spaan.student_app.repository.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
 
     private static final String PREFIX = "Bearer ";
+    private static final String ROLE_NOT_FOUND_ERROR = "Role not found";
 
     @Value("${spaan.sec.jwtSecret}")
     private String jwtSecret;
@@ -35,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private EmailService emailService;
 
     private UserRepository userRepository;
+
+    private RoleRepository roleRepository;
 
     private PasswordEncoder encoder;
 
@@ -50,10 +54,7 @@ public class UserServiceImpl implements UserService {
         List<UserResponse> roommates = new ArrayList<>();
         for (User value : users) {
             if(!value.getUsername().equals(user.getUsername())) {
-                UserResponse userResponse = new UserResponse();
-                userResponse.setUsername(value.getUsername());
-                userResponse.setFirstName(value.getFirstName());
-                userResponse.setLastName(value.getLastName());
+                UserResponse userResponse = createCommonResponse(value);
                 roommates.add(userResponse);
             }
         }
@@ -170,6 +171,23 @@ public class UserServiceImpl implements UserService {
         }
         return ResponseEntity.badRequest().body("Huisgenoot niet gevonden");
     }
+
+    @Override
+    public ResponseEntity<?> promoteUser(String username){
+
+        System.out.println("promotie-->  " + username);
+        if (userExists(username)){
+            User user = findUserByUsername(username);
+            Set<Role> roles = new HashSet<>();
+            Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR).orElseThrow(() -> new RuntimeException(ROLE_NOT_FOUND_ERROR));
+            roles.add(modRole);
+            user.setRoles(roles);
+            userRepository.save(user);
+            return ResponseEntity.ok("Huisgenoot gepromoveerd");
+        }
+        return ResponseEntity.badRequest().body("Huisgenoot niet gevonden");
+    }
+
     private String createRandomUsername(String email){
 
 
@@ -268,5 +286,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     public void setEmailService(EmailService emailService) {
         this.emailService = emailService;
+    }
+
+    @Autowired
+    public void setRoleRepository(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
     }
 }

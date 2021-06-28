@@ -1,7 +1,6 @@
 package nl.spaan.student_app.service;
 
 import nl.spaan.student_app.model.*;
-import nl.spaan.student_app.payload.request.AddRequest;
 import nl.spaan.student_app.payload.request.LoginRequest;
 import nl.spaan.student_app.payload.request.SignupRequest;
 import nl.spaan.student_app.payload.response.JwtResponse;
@@ -13,7 +12,6 @@ import nl.spaan.student_app.repository.UserRepository;
 import nl.spaan.student_app.service.security.jwt.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,10 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthorizationService {
@@ -41,6 +38,7 @@ public class AuthorizationService {
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
+    private BillService billService;
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
@@ -75,6 +73,11 @@ public class AuthorizationService {
         this.jwtUtils = jwtUtils;
     }
 
+    @Autowired
+    public void setBillService(BillService billService) {
+        this.billService = billService;
+    }
+
     public ResponseEntity<MessageResponse> registerUser(@Valid SignupRequest signUpRequest) {
         if (Boolean.TRUE.equals(userRepository.existsByUsername(signUpRequest.getUsername()))) {
             return ResponseEntity
@@ -101,9 +104,15 @@ public class AuthorizationService {
         user.setRoles(roles);
         house.setAccount(account);
         account.setHouse(house);
+
         accountRepository.save(account);
         houseRepository.save(house);
         userRepository.save(user);
+        LocalDate date = LocalDate.now();
+        int month = date.getMonthValue();
+        int year = date.getYear();
+        billService.createBill(house.getId(), month, year);
+
 
         return ResponseEntity.ok(new MessageResponse("Je bent geregistreerd"));
     }
@@ -159,18 +168,7 @@ public class AuthorizationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-        String role = roles.get(0);
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                                userDetails.getId(),
-                                userDetails.getFirstName(),
-                                userDetails.getUsername(),
-                                userDetails.getEmail(),
-                                role));
+        return ResponseEntity.ok(new JwtResponse(jwt));
 
     }
 
