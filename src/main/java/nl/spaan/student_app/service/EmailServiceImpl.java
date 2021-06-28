@@ -28,6 +28,9 @@ public class EmailServiceImpl implements EmailService{
     @Value("${spaan.sec.emailPassword}")
     private String emailPassword;
 
+    @Value("${spaan.sec.useEmail}")
+    private boolean useEmail;
+
 
     //Maak body voor email met daar inde informatie om je aan te melden voor het huis als huisgenoot.
     private String CreateEmailBody(User user){
@@ -56,8 +59,6 @@ public class EmailServiceImpl implements EmailService{
                 +email+"/"
                 +houseId+"'>Huis.frl</a><br>";
         message += "<font color=red>Huisoudste</font>";
-
-        System.out.println("emailBody-->  " + message);
 
         return message;
     }
@@ -88,6 +89,7 @@ public class EmailServiceImpl implements EmailService{
 
             String msg = CreateEmailBody(user);
 
+
             MimeBodyPart mimeBodyPart = new MimeBodyPart();
             mimeBodyPart.setContent(msg, "text/html");
 
@@ -100,7 +102,12 @@ public class EmailServiceImpl implements EmailService{
 
             message.setContent(multipart);
 
-            Transport.send(message);
+            if(!useEmail){
+                System.out.println("emailBody-->  " + msg);
+            }
+            else {
+                Transport.send(message);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

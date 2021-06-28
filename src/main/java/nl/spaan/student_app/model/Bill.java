@@ -25,7 +25,7 @@ public class Bill {
 
     @OneToMany(
             mappedBy = "bill",
-            fetch = FetchType.LAZY)
+            fetch = FetchType.EAGER)
     private List<BillUser> BillsUser;
 
     public long getId() {

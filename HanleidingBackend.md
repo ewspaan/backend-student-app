@@ -1,4 +1,3 @@
-
 Studenten App
 =
 Deze app is ontwikkeld om de financiële handelingen van een studentenhuis te vergemakkelijken.
@@ -11,25 +10,18 @@ Benodigde programma's:
 - IDE (Integrated development environment) Download een IDE naar keuze. Bij deze app is gebruikgemaakt van WebStorm en IntelliJ van jetbrains. Download die via www.jetbrains.com of kies er zelf een IDE.
 - Om de datebase te beheren maken we gebruik van pgAdmin. Te downloaden via https://www.postgresql.org/ftp/pgadmin/pgadmin4/v4.27/windows/ Instaleer de app.  Maak gebruik van de installatie wizard en voor je op finish knop druk vink het vakje uit van de Stack Builder. Die hebben we niet nodig.
 - Om te communiceren met de backend kunnen we de frontend gebruiken of Postmen. Download Postmen op https://www.postman.com/downloads/ en instaleer het op je PC
-- Download Node.js op https://nodejs.org/en/download/ en instaleer het op de je PC.
+- Download Node.js op https://nodejs.org/en/download/ en instaleer het op je PC.
 - Download Maven door de instructies op de volgende pagina te volgen https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html. Om Maven in de terminal te gebruiken volg de instructies in de filmpje https://www.youtube.com/watch?v=dlPjiYyVSlc.
 
 Installatie:
 =
-Frontend installatie:
--
-Open de zip bestanden van de frontend en backend projecten. Sla de directories op je harde schijf.
-Voor de frontend open WebStorm of je eigen IDE. Open het frontend project.
-Installeer eerst Node.js en NPM door in de terminal in te typen “node -v” en daarna "npm –v".  Instaleer daarna Nodemon door “npm install- g nodemon”in de terminal in te typen.
-Haal alle dependencies op door “npm install” in de terminal in te typen.
-Type in de terminal "npm install react-router-dom" in om de dependencies voor de routing binnen te halen.
-Om het project te starten typ "npm start" in de terminal. Het project wordt nu gestart in je webbrowser.
-
 Backend installatie:
 -
 Open je eigen IDE of IntelliJ en open het backend project. Druk op de play knop om het project te starten.
 Maak in een PGadmin een database aan met de naam studentapp op port “5432”
-Vul bij de application.properties je eigen username en password in. Bij jwtsecret je eigen secretkey. Vul bij de email je eigen email gegevens in. Je kunt gebruik maken van Mailtrap. Via https://mailtrap.io/
+Vul bij de application.properties je eigen username en password in. Bij jwtsecret je eigen secretkey. Vul bij de email je eigen email gegevens in. Je kunt gebruik maken van Mailtrap. Via https://mailtrap.io/.
+Heb je geen mailserver dan kun je bij application.properties bij useEmail false invullen. De link om je
+huisgenoten aan te melden verschijnt dan in de console van de backend IDE.
 
 Rollen project:
 -
@@ -102,7 +94,7 @@ POST-request
 
 JSON { "firstName" : " ", "lastName" : " ", "username" : " " , "dateOfBirth" : " " , "password" : " " }
 
-Alle velden zijn verplicht. 
+Alle velden zijn verplicht.
 
 UserController
 =
@@ -157,7 +149,7 @@ GET-request
 
 JSON
 
-Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin. 
+Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin.
 Alleen toegankelijk voor user met de ROLE_MODERATOR en ROLE_USER. Geeft alle mede huisgenoten terug.
 
 Verwijder huisgenoot
@@ -212,7 +204,7 @@ PUT-request
 
 JSON { "fileName" : "jpg in base64 String", "amount" : "12.34", "id" : "id van declaratie" }
 
-Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin. 
+Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin.
 Alleen toegankelijk voor user met de ROLE_MODERATOR en ROLE_USER.
 
 Declaratie ophalen die verander moet worden
@@ -258,7 +250,7 @@ POST-request
 
 JSON { "accountNumber" : "1234567890", "waterUtility" : "12.34 ", "gasUtility" : "12.34" , "elektraUtility" : "12.34", "internetUtility" : "12.34" }
 
-Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin. De utilitys moeten een double zijn. Alleen toegankelijk voor user met de ROLE_MODERATOR. 
+Vul voor de header Authorization in “Bearer jwt-token". Waarbij de jwt-token is vervangen door de token verkregen bij signin. De utilitys moeten een double zijn. Alleen toegankelijk voor user met de ROLE_MODERATOR.
 
 Account info downloaden
 -

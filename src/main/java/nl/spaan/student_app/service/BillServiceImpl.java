@@ -27,6 +27,8 @@ public class BillServiceImpl implements BillService {
 
     private HouseRepository houseRepository;
 
+    private UserRepository userRepository;
+
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
@@ -57,14 +59,20 @@ public class BillServiceImpl implements BillService {
         this.houseRepository = houseRepository;
     }
 
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public void createBill(long houseId, int month, int year) {
 
         Bill bill = new Bill();
-        List<User> users = new ArrayList<>(houseRepository.getOne(houseId).getUserList());
+        House house = houseRepository.findById(houseId).get();
+        List<User> users = new ArrayList<>(userRepository.findAllByHouseId(houseId));
         if (!checkIfBillMonthExist(houseId, month, year)) {
-            bill.setHouse(houseRepository.getOne(houseId));
-            bill.setTotalUtilities(houseRepository.getOne(houseId).getAccount().getTotalAmountUtilities());
+            bill.setHouse(house);
+            bill.setTotalUtilities(house.getAccount().getTotalAmountUtilities());
             bill.setMonth(month);
             bill.setYear(year);
             bill.setTotalDeclarations(0);
@@ -72,6 +80,7 @@ public class BillServiceImpl implements BillService {
             bill.setPayAble(false);
             billRepository.save(bill);
             for( User user : users){
+                System.out.println(user.getUsername());
                 BillUser billUser = new BillUser();
                 billUser.setBill(bill);
                 billUser.setUser(user);
